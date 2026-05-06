@@ -1,0 +1,23 @@
+nnh: Xây dựng API xác thực tài khoản
+- Đăng nhập
+- Đăng ký
+- Quên mật khẩu
+- Phân quyền Admin / Nhân viên / Khách hàng
+
+bdh: Xây dựng API quản trị
+- API sản phẩm
+- API danh mục
+- API đơn hàng
+- API thống kê doanh thu
+
+ptp: Xây dựng giao diện người dùng
+- Trang chủ
+- Danh sách sản phẩm
+- Chi tiết sản phẩm
+- Giỏ hàng
+
+vmc: Xây dựng chức năng đặt hàng
+- Thanh toán
+- Theo dõi đơn hàng
+- Đánh giá sản phẩm
+- Hiển thị thông báo SweetAlert2

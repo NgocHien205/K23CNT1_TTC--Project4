@@ -1,0 +1,44 @@
+G9_TrangSuc_Website/
+│
+├── backend_api/
+│   ├── nnh_auth_api/
+│   │   ├── auth_routes.py
+│   │   └── auth_service.py
+│   │
+│   ├── bdh_admin_api/
+│   │   ├── product_routes.py
+│   │   ├── category_routes.py
+│   │   ├── order_routes.py
+│   │   └── dashboard_routes.py
+│   │
+│   ├── database/
+│   │   ├── db_config.py
+│   │   └── G9_TrangSucDB.sql
+│   │
+│   ├── app.py
+│   └── requirements.txt
+│
+├── frontend_client/
+│   ├── ptp_user_pages/
+│   │   ├── index.html
+│   │   ├── products.html
+│   │   ├── product-detail.html
+│   │   └── cart.html
+│   │
+│   ├── vmc_order_pages/
+│   │   ├── checkout.html
+│   │   ├── orders.html
+│   │   ├── payment.html
+│   │   └── review.html
+│   │
+│   ├── assets/
+│   │   ├── css/style.css
+│   │   ├── js/api.js
+│   │   └── img/
+│   │
+│   └── admin/
+│       ├── dashboard.html
+│       ├── products.html
+│       └── orders.html
+│
+└── README.md
