@@ -107,15 +107,29 @@ CREATE TABLE G9_ChiTietDonHang (
     FOREIGN KEY (G9_MaSanPham) REFERENCES G9_SanPham(G9_MaSanPham)
 );
 
+CREATE TABLE G9_LichSuTrangThaiDonHang (
+    G9_ID INT IDENTITY PRIMARY KEY,
+    G9_MaDonHang INT,
+    G9_TrangThai NVARCHAR(50),
+    G9_ThoiGian DATETIME DEFAULT GETDATE(),
+
+    FOREIGN KEY (G9_MaDonHang) REFERENCES G9_DonHang(G9_MaDonHang)
+);
+
 CREATE TABLE G9_ThanhToan (
     G9_MaThanhToan INT IDENTITY PRIMARY KEY,
     G9_MaDonHang INT NOT NULL,
-    G9_PhuongThuc NVARCHAR(50),
-    G9_SoTien DECIMAL(18,2),
+    G9_PhuongThuc NVARCHAR(50) NOT NULL,
+    G9_CongThanhToan NVARCHAR(50) NULL, 
+    G9_MaGiaoDich VARCHAR(100) NULL,
+    G9_SoTien DECIMAL(18,2) NOT NULL,
     G9_TrangThai NVARCHAR(30) DEFAULT N'Chưa thanh toán',
-    G9_NgayThanhToan DATETIME DEFAULT GETDATE(),
+    G9_NgayThanhToan DATETIME NULL,
+    G9_NgayTao DATETIME DEFAULT GETDATE(),
 
-    FOREIGN KEY (G9_MaDonHang) REFERENCES G9_DonHang(G9_MaDonHang)
+    CONSTRAINT FK_G9_ThanhToan_DonHang
+        FOREIGN KEY (G9_MaDonHang)
+        REFERENCES G9_DonHang(G9_MaDonHang)
 );
 
 CREATE TABLE G9_KhuyenMai (
@@ -127,13 +141,18 @@ CREATE TABLE G9_KhuyenMai (
     G9_TrangThai NVARCHAR(30) DEFAULT N'Hoạt động'
 );
 
-CREATE TABLE G9_SanPham_KhuyenMai (
+CREATE TABLE G9_DanhMuc_KhuyenMai (
     G9_ID INT IDENTITY PRIMARY KEY,
-    G9_MaSanPham INT,
-    G9_MaKhuyenMai INT,
+    G9_MaDanhMuc INT NOT NULL,
+    G9_MaKhuyenMai INT NOT NULL,
 
-    FOREIGN KEY (G9_MaSanPham) REFERENCES G9_SanPham(G9_MaSanPham) ON DELETE CASCADE,
-    FOREIGN KEY (G9_MaKhuyenMai) REFERENCES G9_KhuyenMai(G9_MaKhuyenMai) ON DELETE CASCADE
+    CONSTRAINT FK_G9_DMKM_DanhMuc
+        FOREIGN KEY (G9_MaDanhMuc) REFERENCES G9_DanhMuc(G9_MaDanhMuc)
+        ON DELETE CASCADE,
+
+    CONSTRAINT FK_G9_DMKM_KhuyenMai
+        FOREIGN KEY (G9_MaKhuyenMai) REFERENCES G9_KhuyenMai(G9_MaKhuyenMai)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE G9_DanhGia (
@@ -154,38 +173,115 @@ CREATE INDEX IX_G9_DonHang_User ON G9_DonHang(G9_MaNguoiDung);
 CREATE INDEX IX_G9_GioHang_User ON G9_GioHang(G9_MaNguoiDung);
 CREATE INDEX IX_G9_DanhMuc_Cha 
 ON G9_DanhMuc(G9_MaDanhMucCha);
+CREATE INDEX IX_G9_ThanhToan_DonHang
+ON G9_ThanhToan(G9_MaDonHang);
 
-
-/*Thêm dữ liệu cho các bảng */
 INSERT INTO G9_VaiTro (G9_TenVaiTro)
 VALUES 
 (N'Admin'),
+(N'Nhân viên'),
 (N'Khách hàng');
 
 INSERT INTO G9_NguoiDung 
-(G9_HoTen, G9_TenDangNhap, G9_MatKhau, G9_Email, G9_SoDienThoai, G9_Avatar, G9_MaVaiTro)
+(G9_HoTen, G9_TenDangNhap, G9_MatKhau, G9_Email, G9_SoDienThoai, G9_MaVaiTro)
 VALUES
-(N'Nguyễn Ngọc Hiến', 'nnhien', '123456', 'nnhien@gmail.com', '0900000001', NULL, 2),
-(N'Vũ Mai Chi', 'vmchi', '123456', 'vmchi@gmail.com', '0900000002', NULL, 2),
-(N'Phạm Tuấn Phong', 'ptphong', '123456', 'ptphong@gmail.com', '0900000003', NULL, 2),
-(N'Đức Huy', 'duchuy', '123456', 'duchuy@gmail.com', '0900000004', NULL, 1);
+(N'Bùi Đức Huy', 'admin', '123456', 'admin@gmail.com', '0900000001', 1), -- Admin
+(N'Vũ Mai Chi', 'user1', '123456', 'chi@gmail.com', '0900000002', 3),
+(N'Phạm Tuấn Phong', 'user2', '123456', 'phong@gmail.com', '0900000003', 3),
+(N'Nguyễn Ngọc Hiến', 'user3', '123456', 'hien@gmail.com', '0900000004', 3);
 
-INSERT INTO G9_DanhMuc (G9_TenDanhMuc, G9_MoTa)
-VALUES
-(N'Nhẫn', N'Trang sức nhẫn'),
-(N'Dây chuyền', N'Trang sức cổ'),
-(N'Bông tai', N'Trang sức tai');
+-- cha
+INSERT INTO G9_DanhMuc (G9_TenDanhMuc)
+VALUES (N'Trang sức'),
+(N'Vàng');
 
-INSERT INTO G9_SanPham 
+-- con
+INSERT INTO G9_DanhMuc (G9_TenDanhMuc, G9_MaDanhMucCha)
+VALUES 
+(N'Nhẫn', 1),
+(N'Dây chuyền', 1),
+(N'Vòng tay', 1);
+
+-- cấp 3
+INSERT INTO G9_DanhMuc (G9_TenDanhMuc, G9_MaDanhMucCha)
+VALUES 
+(N'Nhẫn vàng', 2),
+(N'Nhẫn bạc', 2);
+
+INSERT INTO G9_SanPham
 (G9_TenSanPham, G9_MaDanhMuc, G9_ChatLieu, G9_Gia, G9_SoLuongTon, G9_HinhAnhChinh, G9_MoTa)
 VALUES
-(N'Nhẫn vàng 18K đính đá', 1, N'Vàng 18K', 3500000, 15, NULL, N'Nhẫn vàng cao cấp đính đá sang trọng'),
-(N'Nhẫn bạc nữ kiểu Hàn', 1, N'Bạc', 450000, 30, NULL, N'Nhẫn bạc thiết kế trẻ trung'),
-(N'Nhẫn kim cương cao cấp', 1, N'Kim cương', 15000000, 5, NULL, N'Nhẫn kim cương dành cho dịp đặc biệt'),
-(N'Dây chuyền vàng 24K', 2, N'Vàng 24K', 8000000, 10, NULL, N'Dây chuyền vàng nguyên chất'),
-(N'Dây chuyền bạc mặt trái tim', 2, N'Bạc', 1200000, 20, NULL, N'Thiết kế nhẹ nhàng, phù hợp nữ'),
-(N'Dây chuyền ngọc trai', 2, N'Ngọc trai', 5000000, 8, NULL, N'Dây chuyền ngọc trai sang trọng'),
-(N'Bông tai vàng đính đá', 3, N'Vàng', 2500000, 12, NULL, N'Bông tai đẹp, phù hợp dự tiệc'),
-(N'Bông tai bạc đơn giản', 3, N'Bạc', 300000, 40, NULL, N'Phong cách tối giản, dễ phối đồ'),
-(N'Bông tai kim cương nhỏ', 3, N'Kim cương', 7000000, 6, NULL, N'Bông tai kim cương tinh tế'),
-(N'Lắc tay bạc nữ', 2, N'Bạc', 900000, 25, NULL, N'Lắc tay thời trang cho nữ');
+(N'Nhẫn vàng 18K', 5, N'Vàng 18K', 5000000, 10, 'nhan1.jpg', N'Nhẫn vàng cao cấp'),
+(N'Nhẫn bạc 925', 6, N'Bạc 925', 1200000, 20, 'nhan2.jpg', N'Nhẫn bạc đẹp'),
+(N'Dây chuyền vàng', 3, N'Vàng 24K', 7000000, 5, 'day1.jpg', N'Dây chuyền sang trọng');
+
+INSERT INTO G9_HinhAnhSanPham (G9_MaSanPham, G9_DuongDan, G9_LaAnhChinh)
+VALUES
+(1, 'nhan1_1.jpg', 1),
+(1, 'nhan1_2.jpg', 0),
+(2, 'nhan2_1.jpg', 1);
+
+INSERT INTO G9_GioHang (G9_MaNguoiDung)
+VALUES (2), (3), (4);
+
+INSERT INTO G9_ChiTietGioHang
+(G9_MaGioHang, G9_MaSanPham, G9_SoLuong, G9_DonGia)
+VALUES
+(1, 1, 2, 5000000),
+(1, 2, 1, 1200000),
+(2, 3, 1, 7000000), 
+(3, 1, 1, 5000000); 
+
+INSERT INTO G9_DonHang
+(G9_MaNguoiDung, G9_TenNguoiNhan, G9_SDTNhan, G9_DiaChiGiao, G9_TongTien)
+VALUES
+(2, N'Vũ Mai Chi', '0900000002', N'Hà Nội', 6200000),
+(3, N'Phạm Tuấn Phong', '0900000003', N'Hải Phòng', 7000000),
+(4, N'Nguyễn Ngọc Hiến', '0900000004', N'Đà Nẵng', 5000000);
+
+INSERT INTO G9_ChiTietDonHang
+(G9_MaDonHang, G9_MaSanPham, G9_SoLuong, G9_DonGia)
+VALUES
+(1, 1, 1, 5000000),
+(1, 2, 1, 1200000),
+(2, 3, 1, 7000000),
+(3, 1, 1, 5000000);
+
+INSERT INTO G9_ThanhToan
+(G9_MaDonHang, G9_PhuongThuc, G9_SoTien)
+VALUES
+(1, N'COD', 6200000);
+
+INSERT INTO G9_ThanhToan
+(G9_MaDonHang, G9_PhuongThuc, G9_CongThanhToan, G9_MaGiaoDich, G9_SoTien, G9_TrangThai, G9_NgayThanhToan)
+VALUES
+(2, N'Online', N'VNPay', 'VNP123456', 7000000, N'Thành công', GETDATE());
+
+INSERT INTO G9_ThanhToan
+(G9_MaDonHang, G9_PhuongThuc, G9_SoTien)
+VALUES
+(3, N'COD', 5000000);
+
+INSERT INTO G9_ThanhToan
+(G9_MaDonHang, G9_PhuongThuc, G9_CongThanhToan, G9_MaGiaoDich, G9_SoTien, G9_TrangThai, G9_NgayThanhToan)
+VALUES
+(2, N'Online', N'VNPay', 'VNP123456', 7000000, N'Thành công', GETDATE());
+
+INSERT INTO G9_KhuyenMai
+(G9_MaCode, G9_GiaTriGiam, G9_NgayBatDau, G9_NgayKetThuc)
+VALUES
+('SALE10', 100000, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+('SALE20', 200000, GETDATE(), DATEADD(DAY, 15, GETDATE()));
+
+INSERT INTO G9_DanhMuc_KhuyenMai
+(G9_MaDanhMuc, G9_MaKhuyenMai)
+VALUES
+(1, 1),
+(2, 2);
+
+INSERT INTO G9_DanhGia
+(G9_MaSanPham, G9_MaNguoiDung, G9_SoSao, G9_NoiDung)
+VALUES
+(1, 2, 5, N'Sản phẩm rất đẹp'), 
+(2, 3, 4, N'Khá ổn trong tầm giá'), 
+(3, 4, 5, N'Rất hài lòng'); 
