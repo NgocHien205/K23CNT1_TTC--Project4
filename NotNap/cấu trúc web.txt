@@ -1,44 +1,52 @@
-G9_TrangSuc_Website/
+G9_Trangsuc/
 │
-├── backend_api/
-│   ├── nnh_auth_api/
-│   │   ├── auth_routes.py
-│   │   └── auth_service.py
-│   │
-│   ├── bdh_admin_api/
-│   │   ├── product_routes.py
-│   │   ├── category_routes.py
-│   │   ├── order_routes.py
-│   │   └── dashboard_routes.py
-│   │
-│   ├── database/
-│   │   ├── db_config.py
-│   │   └── G9_TrangSucDB.sql
-│   │
-│   ├── app.py
-│   └── requirements.txt
+├── app.py
+├── requirements.txt
 │
-├── frontend_client/
-│   ├── ptp_user_pages/
-│   │   ├── index.html
+├── database/
+│   ├── __init__.py
+│   └── db_config.py
+│
+├── nnh_auth_api/
+│   ├── __init__.py
+│   └── auth_routes.py
+│
+├── bdh_admin_api/
+│   ├── __init__.py
+│   ├── product_routes.py
+│   ├── category_routes.py
+│   ├── order_routes.py
+│   ├── gold_routes.py
+│   ├── news_routes.py
+│   └── dashboard_routes.py
+│
+├── frontend/
+│   ├── index.html
+│   ├── login.html
+│   ├── products.html
+│   ├── product-detail.html
+│   ├── cart.html
+│   ├── checkout.html
+│   ├── gold-price.html
+│   ├── news.html
+│   │
+│   ├── admin/
+│   │   ├── dashboard.html
 │   │   ├── products.html
-│   │   ├── product-detail.html
-│   │   └── cart.html
-│   │
-│   ├── vmc_order_pages/
-│   │   ├── checkout.html
 │   │   ├── orders.html
-│   │   ├── payment.html
-│   │   └── review.html
+│   │   ├── gold.html
+│   │   └── news.html
 │   │
-│   ├── assets/
-│   │   ├── css/style.css
-│   │   ├── js/api.js
-│   │   └── img/
-│   │
-│   └── admin/
-│       ├── dashboard.html
-│       ├── products.html
-│       └── orders.html
+│   └── assets/
+│       ├── css/style.css
+│       ├── js/
+│       │   ├── product.js
+│       │   ├── login.js
+│       │   ├── cart.js
+│       │   ├── checkout.js
+│       │   ├── gold.js
+│       │   ├── news.js
+│       │   └── dashboard.js
+│       └── img/
 │
 └── README.md

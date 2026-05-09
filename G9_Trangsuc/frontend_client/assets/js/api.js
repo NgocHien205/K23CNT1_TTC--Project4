@@ -1,35 +1,341 @@
-async function loadProducts() {
+// ==============================
+// API CONFIG
+// ==============================
 
-    const response =
-        await fetch("http://127.0.0.1:5000/api/bdh/products/");
+const API_BASE_URL = "http://127.0.0.1:5000/api";
 
-    const products = await response.json();
 
-    let html = "";
+// ==============================
+// HELPER FETCH GET
+// ==============================
 
-    products.forEach(product => {
+async function apiGet(endpoint) {
 
-        html += `
-            <div class="col-md-4">
-                <div class="card mb-3">
+    try {
 
-                    <img src="../assets/img/${product.image}"
-                         class="card-img-top">
+        const response = await fetch(
+            `${API_BASE_URL}${endpoint}`
+        );
 
-                    <div class="card-body">
+        if (!response.ok) {
 
-                        <h5>${product.name}</h5>
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+        }
 
-                        <p>${product.price} VNĐ</p>
+        return await response.json();
 
-                    </div>
+    } catch (error) {
 
-                </div>
-            </div>
-        `;
-    });
+        console.error(
+            "GET API ERROR:",
+            error
+        );
 
-    document.getElementById("product-list").innerHTML = html;
+        return null;
+    }
 }
 
-loadProducts();
+
+// ==============================
+// HELPER FETCH POST
+// ==============================
+
+async function apiPost(endpoint, data = {}) {
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+            }
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+        }
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(
+            "POST API ERROR:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+// ==============================
+// HELPER FETCH PUT
+// ==============================
+
+async function apiPut(endpoint, data = {}) {
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                method: "PUT",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify(data)
+            }
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+        }
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(
+            "PUT API ERROR:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+// ==============================
+// HELPER FETCH DELETE
+// ==============================
+
+async function apiDelete(endpoint) {
+
+    try {
+
+        const response = await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        if (!response.ok) {
+
+            throw new Error(
+                `HTTP Error: ${response.status}`
+            );
+        }
+
+        return await response.json();
+
+    } catch (error) {
+
+        console.error(
+            "DELETE API ERROR:",
+            error
+        );
+
+        return null;
+    }
+}
+
+
+// ==============================
+// USER LOCAL STORAGE
+// ==============================
+
+function saveUser(user) {
+
+    localStorage.setItem(
+        "user",
+        JSON.stringify(user)
+    );
+}
+
+
+function getUser() {
+
+    return JSON.parse(
+        localStorage.getItem("user")
+    );
+}
+
+
+function logout() {
+
+    localStorage.removeItem("user");
+
+    window.location.href = "login.html";
+}
+
+
+// ==============================
+// CART LOCAL STORAGE
+// ==============================
+
+function getCart() {
+
+    return JSON.parse(
+        localStorage.getItem("cart")
+    ) || [];
+}
+
+
+function saveCart(cart) {
+
+    localStorage.setItem(
+        "cart",
+        JSON.stringify(cart)
+    );
+}
+
+
+function clearCart() {
+
+    localStorage.removeItem("cart");
+}
+
+
+// ==============================
+// FORMAT MONEY
+// ==============================
+
+function formatMoney(number) {
+
+    return Number(number)
+        .toLocaleString("vi-VN") + " VNĐ";
+}
+
+
+// ==============================
+// CHECK LOGIN
+// ==============================
+
+function checkLogin() {
+
+    const user = getUser();
+
+    if (!user) {
+
+        alert("Vui lòng đăng nhập");
+
+        window.location.href =
+            "login.html";
+    }
+}
+
+
+// ==============================
+// CHECK ADMIN
+// ==============================
+
+function checkAdmin() {
+
+    const user = getUser();
+
+    if (
+        !user ||
+        (user.roleId !== 1 &&
+         user.roleId !== 2)
+    ) {
+
+        alert("Không có quyền truy cập");
+
+        window.location.href =
+            "../index.html";
+    }
+}
+
+
+// ==============================
+// ADD TO CART
+// ==============================
+
+function addToCart(product) {
+
+    let cart = getCart();
+
+    const existing =
+        cart.find(
+            item => item.id === product.id
+        );
+
+    if (existing) {
+
+        existing.quantityCart += 1;
+
+    } else {
+
+        product.quantityCart = 1;
+
+        cart.push(product);
+    }
+
+    saveCart(cart);
+
+    alert("Đã thêm vào giỏ hàng");
+}
+
+
+// ==============================
+// TOTAL CART
+// ==============================
+
+function getCartTotal() {
+
+    let cart = getCart();
+
+    let total = 0;
+
+    cart.forEach(item => {
+
+        total +=
+            item.price *
+            item.quantityCart;
+    });
+
+    return total;
+}
+
+
+// ==============================
+// LOAD USER INFO
+// ==============================
+
+function loadUserInfo() {
+
+    const user = getUser();
+
+    if (user) {
+
+        console.log(
+            "Đã đăng nhập:",
+            user.name
+        );
+    }
+}
+
+
+// ==============================
+// AUTO LOAD
+// ==============================
+
+loadUserInfo();

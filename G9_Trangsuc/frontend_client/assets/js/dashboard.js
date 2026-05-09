@@ -1,20 +1,14 @@
-const ctx =
-document.getElementById('myChart');
+async function loadDashboard() {
+    const response = await fetch(`${API_BASE_URL}/bdh/dashboard/statistics`);
+    const data = await response.json();
 
-new Chart(ctx, {
+    document.getElementById("product-count").innerText = data.products;
+    document.getElementById("order-count").innerText = data.orders;
+    document.getElementById("user-count").innerText = data.users;
+    document.getElementById("news-count").innerText = data.news;
 
-    type: 'bar',
+    document.getElementById("revenue").innerText =
+        "Tổng doanh thu: " + data.revenue.toLocaleString() + " VNĐ";
+}
 
-    data: {
-
-        labels: ['Jan', 'Feb', 'Mar'],
-
-        datasets: [{
-
-            label: 'Doanh thu',
-
-            data: [120, 190, 300]
-
-        }]
-    }
-});
+loadDashboard();

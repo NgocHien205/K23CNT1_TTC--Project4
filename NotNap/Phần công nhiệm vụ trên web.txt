@@ -1,23 +1,30 @@
-nnh: Xây dựng API xác thực tài khoản
-- Đăng nhập
-- Đăng ký
-- Quên mật khẩu
-- Phân quyền Admin / Nhân viên / Khách hàng
+nnh:
+- auth_routes.py
+- login.html
+- login.js
+- Đăng nhập, phân quyền
 
-bdh: Xây dựng API quản trị
-- API sản phẩm
-- API danh mục
-- API đơn hàng
-- API thống kê doanh thu
+bdh:
+- product_routes.py
+- category_routes.py
+- order_routes.py
+- dashboard_routes.py
+- gold_routes.py
+- news_routes.py
+- API quản trị
 
-ptp: Xây dựng giao diện người dùng
-- Trang chủ
-- Danh sách sản phẩm
-- Chi tiết sản phẩm
-- Giỏ hàng
+ptp:
+- index.html
+- products.html
+- product-detail.html
+- cart.html
+- product.js
+- cart.js
 
-vmc: Xây dựng chức năng đặt hàng
-- Thanh toán
-- Theo dõi đơn hàng
-- Đánh giá sản phẩm
-- Hiển thị thông báo SweetAlert2
+vmc:
+- checkout.html
+- checkout.js
+- gold-price.html
+- news.html
+- gold.js
+- news.js
