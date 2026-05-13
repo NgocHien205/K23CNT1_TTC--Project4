@@ -48,3 +48,57 @@ def login():
         "success": False,
         "message": "Sai tài khoản hoặc mật khẩu"
     }), 401
+@auth_bp.route("/register", methods=["POST"])
+def register():
+    data = request.json
+
+    fullname = data.get("fullname")
+    username = data.get("username")
+    password = data.get("password")
+    email = data.get("email")
+    phone = data.get("phone")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT G9_MaNguoiDung 
+        FROM G9_NguoiDung
+        WHERE G9_TenDangNhap = ? OR G9_Email = ?
+    """, (username, email))
+
+    existed = cursor.fetchone()
+
+    if existed:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "Tên đăng nhập hoặc email đã tồn tại"
+        })
+
+    cursor.execute("""
+        INSERT INTO G9_NguoiDung
+        (
+            G9_HoTen,
+            G9_TenDangNhap,
+            G9_MatKhau,
+            G9_Email,
+            G9_SoDienThoai,
+            G9_MaVaiTro
+        )
+        VALUES (?, ?, ?, ?, ?, 3)
+    """, (
+        fullname,
+        username,
+        password,
+        email,
+        phone
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Đăng ký tài khoản thành công"
+    })

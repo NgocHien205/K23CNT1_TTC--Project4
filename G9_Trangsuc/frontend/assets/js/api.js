@@ -22,9 +22,8 @@ function getUser() {
 }
 
 function logout() {
-
     localStorage.removeItem("user");
-
+    localStorage.removeItem("cart");
     window.location.href = "login.html";
 }
 
@@ -41,4 +40,13 @@ function saveCart(cart) {
         "cart",
         JSON.stringify(cart)
     );
+}
+// #phần kiểm tra Admin
+function checkAdmin() {
+    const user = getUser();
+
+    if (!user || (user.roleId !== 1 && user.roleId !== 2)) {
+        alert("Bạn không có quyền truy cập trang quản trị");
+        window.location.href = "../index.html";
+    }
 }
