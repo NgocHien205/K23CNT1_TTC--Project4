@@ -367,7 +367,7 @@ N'Nhằm kích cầu mua sắm, cửa hàng triển khai chương trình giảm 
 1,
 3
 ),
-(
+(	
 N'Giá vàng thế giới biến động nhẹ',
 N'Ảnh hưởng từ FED khiến giá vàng dao động',
 N'Giá vàng thế giới có xu hướng điều chỉnh nhẹ do các chính sách tiền tệ từ Mỹ...',

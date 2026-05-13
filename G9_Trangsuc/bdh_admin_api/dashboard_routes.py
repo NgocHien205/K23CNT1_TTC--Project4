@@ -1,10 +1,16 @@
 from flask import Blueprint, jsonify
 from database.db_config import get_connection
 
-dashboard_bp = Blueprint("dashboard_bp", __name__)
+# TẠO BLUEPRINT
+dashboard_bp = Blueprint(
+    "dashboard_bp",
+    __name__
+)
 
+# API THỐNG KÊ DASHBOARD
 @dashboard_bp.route("/statistics", methods=["GET"])
 def statistics():
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -32,4 +38,3 @@ def statistics():
         "news": news_count,
         "revenue": float(revenue)
     })
-    

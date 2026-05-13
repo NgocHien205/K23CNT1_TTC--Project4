@@ -1,10 +1,16 @@
 from flask import Blueprint, jsonify
 from database.db_config import get_connection
 
-category_bp = Blueprint("category_bp", __name__)
+# TẠO BLUEPRINT DANH MỤC
+category_bp = Blueprint(
+    "category_bp",
+    __name__
+)
 
+# API LẤY DANH SÁCH DANH MỤC
 @category_bp.route("/", methods=["GET"])
 def get_categories():
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -20,7 +26,9 @@ def get_categories():
 
     categories = []
 
-    for row in cursor.fetchall():
+    rows = cursor.fetchall()
+
+    for row in rows:
         categories.append({
             "id": row.G9_MaDanhMuc,
             "name": row.G9_TenDanhMuc,
@@ -30,4 +38,5 @@ def get_categories():
         })
 
     conn.close()
+
     return jsonify(categories)
