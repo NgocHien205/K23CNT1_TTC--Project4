@@ -39,3 +39,62 @@ def get_products():
     conn.close()
 
     return jsonify(products)
+
+#CRUD sản phẩm
+@product_bp.route("/update/<int:id>", methods=["PUT"])
+def update_product(id):
+    data = request.json
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE G9_SanPham
+        SET 
+            G9_TenSanPham = ?,
+            G9_MaDanhMuc = ?,
+            G9_ChatLieu = ?,
+            G9_Gia = ?,
+            G9_SoLuongTon = ?,
+            G9_HinhAnhChinh = ?,
+            G9_MoTa = ?,
+            G9_TrangThai = ?
+        WHERE G9_MaSanPham = ?
+    """, (
+        data["name"],
+        data["categoryId"],
+        data["material"],
+        data["price"],
+        data["quantity"],
+        data["image"],
+        data["description"],
+        data["status"],
+        id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Cập nhật sản phẩm thành công"
+    })
+
+
+@product_bp.route("/delete/<int:id>", methods=["DELETE"])
+def delete_product(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM G9_SanPham
+        WHERE G9_MaSanPham = ?
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Xóa sản phẩm thành công"
+    })

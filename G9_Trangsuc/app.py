@@ -8,6 +8,8 @@ from bdh_admin_api.order_routes import order_bp
 from bdh_admin_api.gold_routes import gold_bp
 from bdh_admin_api.news_routes import news_bp
 from bdh_admin_api.dashboard_routes import dashboard_bp
+from bdh_admin_api.user_routes import user_bp
+from bdh_admin_api.review_routes import review_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -19,6 +21,8 @@ app.register_blueprint(order_bp, url_prefix="/api/bdh/orders")
 app.register_blueprint(gold_bp, url_prefix="/api/bdh/gold")
 app.register_blueprint(news_bp, url_prefix="/api/bdh/news")
 app.register_blueprint(dashboard_bp, url_prefix="/api/bdh/dashboard")
+app.register_blueprint(user_bp, url_prefix="/api/bdh/users")
+app.register_blueprint(review_bp, url_prefix="/api/bdh/reviews")
 
 @app.route("/")
 def home():
