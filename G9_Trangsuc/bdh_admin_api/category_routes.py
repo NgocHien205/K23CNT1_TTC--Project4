@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify
 from database.db_config import get_connection
+from flask import Blueprint, jsonify, request
 
 # TẠO BLUEPRINT DANH MỤC
 category_bp = Blueprint(
@@ -40,3 +41,83 @@ def get_categories():
     conn.close()
 
     return jsonify(categories)
+
+@category_bp.route("/create", methods=["POST"])
+def create_category():
+    data = request.json
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        INSERT INTO G9_DanhMuc
+        (
+            G9_TenDanhMuc,
+            G9_MoTa,
+            G9_MaDanhMucCha
+        )
+        VALUES (?, ?, ?)
+    """, (
+        data["name"],
+        data["description"],
+        data.get("parentId")
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Thêm danh mục thành công"
+    })
+
+
+@category_bp.route("/update/<int:id>", methods=["PUT"])
+def update_category(id):
+    data = request.json
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE G9_DanhMuc
+        SET 
+            G9_TenDanhMuc = ?,
+            G9_MoTa = ?,
+            G9_MaDanhMucCha = ?,
+            G9_TrangThai = ?
+        WHERE G9_MaDanhMuc = ?
+    """, (
+        data["name"],
+        data["description"],
+        data.get("parentId"),
+        data["status"],
+        id
+    ))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Cập nhật danh mục thành công"
+    })
+
+
+@category_bp.route("/delete/<int:id>", methods=["DELETE"])
+def delete_category(id):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        DELETE FROM G9_DanhMuc
+        WHERE G9_MaDanhMuc = ?
+    """, (id,))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Xóa danh mục thành công"
+    })
