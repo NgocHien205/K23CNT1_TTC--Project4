@@ -36,6 +36,10 @@ function renderProducts(products) {
                                 class="btn btn-warning btn-sm">
                             Thêm giỏ hàng
                         </button>
+                        <button onclick='addWishlist(${JSON.stringify(product)})'
+                            class="btn btn-danger btn-sm mt-2">
+                            ♥ Yêu thích
+                        </button>
 
                     </div>
                 </div>
@@ -82,3 +86,75 @@ function addToCart(product) {
 }
 
 loadProducts();
+
+let currentPage = 1;
+const pageSize = 6;
+let allProducts = [];
+
+function paginateProducts(page) {
+
+    currentPage = page;
+
+    const start =
+        (page - 1) * pageSize;
+
+    const end =
+        start + pageSize;
+
+    const products =
+        allProducts.slice(start, end);
+
+    renderProducts(products);
+
+    renderPagination();
+}
+
+function renderPagination() {
+
+    const totalPages =
+        Math.ceil(
+            allProducts.length / pageSize
+        );
+
+    let html = "";
+
+    for (let i = 1; i <= totalPages; i++) {
+
+        html += `
+            <button
+                onclick="paginateProducts(${i})"
+                class="btn btn-sm btn-dark me-2">
+
+                ${i}
+
+            </button>
+        `;
+    }
+
+    document.getElementById(
+        "pagination"
+    ).innerHTML = html;
+}
+
+allProducts = products;
+
+paginateProducts(1);
+
+function addWishlist(product) {
+    let wishlist = getWishlist();
+
+    const existed = wishlist.find(
+        item => item.id === product.id
+    );
+
+    if (existed) {
+        alert("Sản phẩm đã có trong yêu thích");
+        return;
+    }
+
+    wishlist.push(product);
+
+    saveWishlist(wishlist);
+
+    alert("Đã thêm vào yêu thích");
+}

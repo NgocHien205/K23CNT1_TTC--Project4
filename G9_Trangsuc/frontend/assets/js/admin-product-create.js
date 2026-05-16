@@ -1,3 +1,44 @@
+async function uploadImage() {
+
+    const imageFile =
+        document.getElementById(
+            "upload-image"
+        ).files[0];
+
+    if (!imageFile) return;
+
+    const formData = new FormData();
+
+    formData.append(
+        "image",
+        imageFile
+    );
+
+    const response = await fetch(
+        `${API_BASE_URL}/bdh/upload/`,
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+
+        document.getElementById(
+            "image"
+        ).value = data.filename;
+    }
+}
+
+document.getElementById(
+    "upload-image"
+).addEventListener(
+    "change",
+    uploadImage
+);
+
 async function createProduct() {
     const product = {
         name: document.getElementById("name").value,

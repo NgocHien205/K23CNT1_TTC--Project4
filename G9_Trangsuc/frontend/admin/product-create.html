@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <title>Thêm sản phẩm</title>
@@ -9,40 +10,44 @@
 
 <body>
 
-<div class="container py-5">
+    <div class="container py-5">
 
-    <div class="col-md-7 mx-auto">
+        <div class="col-md-7 mx-auto">
 
-        <h3 class="mb-4">Thêm sản phẩm</h3>
+            <h3 class="mb-4">Thêm sản phẩm</h3>
 
-        <input id="name" class="form-control mb-3" placeholder="Tên sản phẩm">
+            <input id="name" class="form-control mb-3" placeholder="Tên sản phẩm">
 
-        <input id="categoryId" type="number" class="form-control mb-3" placeholder="Mã danh mục">
+            <input id="categoryId" type="number" class="form-control mb-3" placeholder="Mã danh mục">
 
-        <input id="material" class="form-control mb-3" placeholder="Chất liệu">
+            <input id="material" class="form-control mb-3" placeholder="Chất liệu">
 
-        <input id="price" type="number" class="form-control mb-3" placeholder="Giá">
+            <input id="price" type="number" class="form-control mb-3" placeholder="Giá">
 
-        <input id="quantity" type="number" class="form-control mb-3" placeholder="Số lượng">
+            <input id="quantity" type="number" class="form-control mb-3" placeholder="Số lượng">
+            /*--*/
+            <input type="file" id="upload-image" class="form-control mb-3">
 
-        <input id="image" class="form-control mb-3" placeholder="Tên ảnh, ví dụ: nhan1.jpg">
+            <input id="image" class="form-control mb-3" placeholder="Tên ảnh" readonly>
+            <!-- <input id="image" class="form-control mb-3" placeholder="Tên ảnh, ví dụ: nhan1.jpg"> -->
 
-        <textarea id="description" class="form-control mb-3" placeholder="Mô tả"></textarea>
+            <textarea id="description" class="form-control mb-3" placeholder="Mô tả"></textarea>
 
-        <button onclick="createProduct()" class="btn btn-success">
-            Lưu sản phẩm
-        </button>
+            <button onclick="createProduct()" class="btn btn-success">
+                Lưu sản phẩm
+            </button>
 
-        <a href="products.html" class="btn btn-secondary">
-            Quay lại
-        </a>
+            <a href="products.html" class="btn btn-secondary">
+                Quay lại
+            </a>
+
+        </div>
 
     </div>
 
-</div>
-
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/admin-product-create.js"></script>
+    <script src="../assets/js/api.js"></script>
+    <script src="../assets/js/admin-product-create.js"></script>
 
 </body>
+
 </html>

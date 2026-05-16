@@ -1,3 +1,5 @@
+from urllib import request
+
 from flask import Blueprint, jsonify
 from database.db_config import get_connection
 
@@ -98,3 +100,69 @@ def delete_product(id):
         "success": True,
         "message": "Xóa sản phẩm thành công"
     })
+#API tìm kiếm sản phẩm 
+@product_bp.route("/search/<string:keyword>", methods=["GET"])
+def search_products(keyword):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM G9_SanPham
+        WHERE G9_TenSanPham LIKE ?
+    """, (f"%{keyword}%",))
+
+    products = []
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+
+        products.append({
+
+            "id": row.G9_MaSanPham,
+            "name": row.G9_TenSanPham,
+            "price": float(row.G9_Gia),
+            "image": row.G9_HinhAnhChinh,
+            "quantity": row.G9_SoLuongTon,
+            "material": row.G9_ChatLieu,
+            "description": row.G9_MoTa,
+            "status": row.G9_TrangThai
+
+        })
+
+    conn.close()
+
+    return jsonify(products)
+#lọc theo danh mục
+@product_bp.route("/category/<int:category_id>", methods=["GET"])
+def get_products_by_category(category_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM G9_SanPham
+        WHERE G9_MaDanhMuc = ?
+    """, (category_id,))
+
+    products = []
+
+    for row in cursor.fetchall():
+
+        products.append({
+
+            "id": row.G9_MaSanPham,
+            "name": row.G9_TenSanPham,
+            "price": float(row.G9_Gia),
+            "image": row.G9_HinhAnhChinh,
+            "quantity": row.G9_SoLuongTon,
+            "material": row.G9_ChatLieu
+
+        })
+
+    conn.close()
+
+    return jsonify(products)
