@@ -9,30 +9,38 @@
 
 <body>
 
-<div class="container py-5">
+<div class="admin-content">
 
-    <h3>Quản lý đơn hàng</h3>
+    <h3 class="mb-4">Quản lý đơn hàng</h3>
 
-    <table class="table table-bordered mt-4">
+    <div class="card admin-card">
+        <div class="card-body">
 
-        <thead class="table-dark">
-            <tr>
-                <th>Mã đơn</th>
-                <th>Khách hàng</th>
-                <th>Tổng tiền</th>
-                <th>Trạng thái</th>
-                <th>Ngày đặt</th>
-                <th>Cập nhật</th>
-            </tr>
-        </thead>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày đặt</th>
+                        <th>Cập nhật</th>
+                    </tr>
+                </thead>
 
-        <tbody id="admin-order-body"></tbody>
+                <tbody id="admin-order-body"></tbody>
+            </table>
 
-    </table>
+        </div>
+    </div>
 
 </div>
 
 <script src="../assets/js/api.js"></script>
+<script src="../assets/js/admin-layout.js"></script>
+<script>
+    renderAdminLayout("orders");
+</script>
 <script src="../assets/js/admin-orders.js"></script>
 
 </body>

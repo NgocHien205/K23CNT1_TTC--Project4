@@ -121,3 +121,25 @@ def delete_category(id):
         "success": True,
         "message": "Xóa danh mục thành công"
     })
+#API cập nhật trạng thái
+@category_bp.route("/update-status/<int:id>", methods=["PUT"])
+def update_category_status(id):
+    data = request.json
+    status = data.get("status")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE G9_DanhMuc
+        SET G9_TrangThai = ?
+        WHERE G9_MaDanhMuc = ?
+    """, (status, id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Cập nhật trạng thái danh mục thành công"
+    })

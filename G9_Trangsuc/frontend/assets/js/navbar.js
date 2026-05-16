@@ -1,23 +1,19 @@
 function renderNavbar() {
-
-    const user = getUser();
+    const user = JSON.parse(localStorage.getItem("user"));
 
     let authHtml = "";
 
     if (user) {
-
         authHtml = `
-            <a href="profile.html" class="btn btn-outline-light btn-sm me-2">
-                ${user.name}
+            <a href="profile.html" class="btn btn-outline-warning btn-sm me-2">
+                Xin chào, ${user.name}
             </a>
 
             <button onclick="logout()" class="btn btn-danger btn-sm">
                 Đăng xuất
             </button>
         `;
-
     } else {
-
         authHtml = `
             <a href="login.html" class="btn btn-light btn-sm me-2">
                 Đăng nhập
@@ -29,76 +25,28 @@ function renderNavbar() {
         `;
     }
 
-    const navbar = `
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
-
+    document.getElementById("navbar").innerHTML = `
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-
-                <a class="navbar-brand text-warning fw-bold fs-3"
-                   href="index.html">
-
+                <a href="index.html" class="navbar-brand text-warning fw-bold">
                     G9 Trang Sức
-
                 </a>
 
-                <button class="navbar-toggler"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#menu">
-
-                    <span class="navbar-toggler-icon"></span>
-
-                </button>
-
-                <div class="collapse navbar-collapse" id="menu">
-
-                    <ul class="navbar-nav me-auto">
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.html">
-                                Trang chủ
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="products.html">
-                                Sản phẩm
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="gold-price.html">
-                                Giá vàng
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="news.html">
-                                Tin tức
-                            </a>
-                        </li>
-
-                    </ul>
-
-                    <a href="cart.html"
-                       class="btn btn-warning btn-sm me-3">
-
-                        Giỏ hàng
-
-                    </a>
-                    <a href="wishlist.html" class="btn btn-outline-danger btn-sm me-2">
-                        Yêu thích
-                    </a>
-
+                <div>
+                    <a href="index.html" class="btn btn-outline-light btn-sm me-2">Trang chủ</a>
+                    <a href="products.html" class="btn btn-outline-light btn-sm me-2">Sản phẩm</a>
+                    <a href="cart.html" class="btn btn-warning btn-sm me-2">Giỏ hàng</a>
                     ${authHtml}
-
                 </div>
-
             </div>
-
         </nav>
     `;
+}
 
-    document.getElementById("navbar").innerHTML = navbar;
+function logout() {
+    localStorage.removeItem("user");
+    localStorage.removeItem("cart");
+    window.location.href = "login.html";
 }
 
 renderNavbar();

@@ -80,3 +80,68 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* ---  css admin */
+body {
+    background: #f4f6f9;
+}
+
+.admin-sidebar {
+    width: 260px;
+    min-height: 100vh;
+    background: #1f252b;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 25px;
+}
+
+.admin-logo {
+    color: #ffc107;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+.admin-sidebar a {
+    display: block;
+    color: white;
+    text-decoration: none;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border: 1px solid #6c757d;
+}
+
+.admin-sidebar a:hover,
+.admin-sidebar a.active {
+    background: #ffc107;
+    color: #000;
+    border-color: #ffc107;
+}
+
+.admin-logout {
+    width: 100%;
+    margin-top: 30px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #dc3545;
+    color: white;
+    font-weight: bold;
+}
+
+.admin-content {
+    margin-left: 280px;
+    padding: 50px;
+}
+
+.admin-card {
+    border: none;
+    border-radius: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+.table thead th {
+    background: #1f252b;
+    color: white;
+}
