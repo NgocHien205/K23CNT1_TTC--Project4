@@ -29,27 +29,27 @@
 
         <div class="input-group mb-4">
             <input type="text" id="keyword" class="form-control" placeholder="Nhập tên sản phẩm cần tìm...">
-            
+
             <button onclick="searchProduct()" class="btn btn-dark">
                 Tìm kiếm
             </button>
-            /*--*/
-            <div class="row mb-4">
+        
+        <div class="row mb-4">
 
-                <div class="col-md-4">
+            <div class="col-md-4">
 
-                    <select id="category-filter" class="form-control" onchange="filterByCategory()">
+                <select id="category-filter" class="form-control" onchange="filterByCategory()">
 
-                    </select>
-
-                </div>
+                </select>
 
             </div>
-        </div>
 
-        <div class="row" id="product-list"></div>
-        <div class="mt-4 text-center" id="pagination">
         </div>
+    </div>
+
+    <div class="row" id="product-list"></div>
+    <div class="mt-4 text-center" id="pagination">
+    </div>
     </div>
 
     <script src="assets/js/api.js"></script>

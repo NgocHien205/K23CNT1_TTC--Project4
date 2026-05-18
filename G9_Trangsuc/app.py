@@ -25,7 +25,7 @@ app.register_blueprint(dashboard_bp, url_prefix="/api/bdh/dashboard")
 app.register_blueprint(user_bp, url_prefix="/api/bdh/users")
 app.register_blueprint(review_bp, url_prefix="/api/bdh/reviews")
 app.register_blueprint(upload_bp,url_prefix="/api/bdh/upload")
-
+    
 
 @app.route("/")
 def home():

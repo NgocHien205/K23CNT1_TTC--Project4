@@ -28,6 +28,7 @@ function renderAdminLayout(activePage = "") {
                 <a class="${activePage === "users" ? "active" : ""}" href="users.html">Người dùng</a>
                 <a class="${activePage === "gold" ? "active" : ""}" href="gold.html">Giá vàng</a>
                 <a class="${activePage === "news" ? "active" : ""}" href="news.html">Tin tức</a>
+             
 
                 <button onclick="adminLogout()" class="admin-logout">
                     Đăng xuất

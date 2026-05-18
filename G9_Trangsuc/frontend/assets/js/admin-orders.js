@@ -8,6 +8,16 @@ function getOrderBadge(status) {
     return "bg-secondary";
 }
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+
+    if (isNaN(date.getTime())) {
+        return dateString;
+    }
+
+    return date.toLocaleString("vi-VN");
+}
+
 async function loadAdminOrders() {
     const response = await fetch(`${API_BASE_URL}/bdh/orders/`);
     const orders = await response.json();
@@ -40,29 +50,29 @@ async function loadAdminOrders() {
                 <td>
                     <select class="form-select form-select-sm"
                             onchange="updateStatus(${order.id}, this.value)">
-                        <option value="">
-                            Chọn trạng thái
-                        </option>
 
-                        <option value="Chờ xác nhận">
+                        <option value="">Chọn trạng thái</option>
+
+                        <option value="Chờ xác nhận" ${order.status === "Chờ xác nhận" ? "selected" : ""}>
                             Chờ xác nhận
                         </option>
 
-                        <option value="Đã xác nhận">
+                        <option value="Đã xác nhận" ${order.status === "Đã xác nhận" ? "selected" : ""}>
                             Đã xác nhận
                         </option>
 
-                        <option value="Đang giao">
+                        <option value="Đang giao" ${order.status === "Đang giao" ? "selected" : ""}>
                             Đang giao
                         </option>
 
-                        <option value="Hoàn thành">
+                        <option value="Hoàn thành" ${order.status === "Hoàn thành" ? "selected" : ""}>
                             Hoàn thành
                         </option>
 
-                        <option value="Đã hủy">
+                        <option value="Đã hủy" ${order.status === "Đã hủy" ? "selected" : ""}>
                             Đã hủy
                         </option>
+
                     </select>
                 </td>
             </tr>
@@ -75,47 +85,28 @@ async function loadAdminOrders() {
 async function updateStatus(id, status) {
     if (!status) return;
 
-    const confirmUpdate = confirm(
-        "Bạn có chắc muốn cập nhật trạng thái đơn hàng này?"
-    );
+    const check = confirm("Bạn có chắc muốn cập nhật trạng thái đơn hàng?");
 
-    if (!confirmUpdate) {
+    if (!check) {
         loadAdminOrders();
         return;
     }
 
-    const response = await fetch(
-        `${API_BASE_URL}/bdh/orders/update-status/${id}`,
-        {
-            method: "PUT",
-
-            headers: {
-                "Content-Type": "application/json"
-            },
-
-            body: JSON.stringify({
-                status: status
-            })
-        }
-    );
+    const response = await fetch(`${API_BASE_URL}/bdh/orders/update-status/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            status: status
+        })
+    });
 
     const data = await response.json();
 
     alert(data.message);
 
     loadAdminOrders();
-}
-
-function formatDate(dateString) {
-    if (!dateString) return "";
-
-    const date = new Date(dateString);
-
-    if (isNaN(date.getTime())) {
-        return dateString;
-    }
-
-    return date.toLocaleString("vi-VN");
 }
 
 loadAdminOrders();
