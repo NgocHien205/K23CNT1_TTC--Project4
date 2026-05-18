@@ -20,7 +20,8 @@ async function login() {
 
         Swal.fire({
             icon: "success",
-            title: "Đăng nhập thành công"
+            title: "Đăng nhập thành công",
+            text: "Xin chào " + data.user.name
         });
 
         setTimeout(() => {

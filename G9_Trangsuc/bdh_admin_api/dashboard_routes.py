@@ -29,6 +29,9 @@ def statistics():
     cursor.execute("SELECT ISNULL(SUM(G9_TongTien), 0) FROM G9_DonHang")
     revenue = cursor.fetchone()[0]
 
+    cursor.execute("SELECT COUNT(*) FROM G9_GiaVang")
+    gold_count = cursor.fetchone()[0]
+
     conn.close()
 
     return jsonify({
@@ -36,5 +39,6 @@ def statistics():
         "orders": order_count,
         "users": user_count,
         "news": news_count,
+        "gold": gold_count,
         "revenue": float(revenue)
     })
