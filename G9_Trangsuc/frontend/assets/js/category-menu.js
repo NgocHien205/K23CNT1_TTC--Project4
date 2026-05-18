@@ -1,44 +1,39 @@
 async function loadCategoryMenu() {
-
-    const response = await fetch(
-        `${API_BASE_URL}/bdh/categories/`
-    );
-
+    const response = await fetch(`${API_BASE_URL}/bdh/categories/`);
     const categories = await response.json();
 
     let html = `
-        <option value="">
-            Tất cả danh mục
-        </option>
+        <li>
+            <button class="dropdown-item active"
+                    onclick="filterAllProducts()">
+                Tất cả danh mục
+            </button>
+        </li>
     `;
 
     categories.forEach(item => {
+        if (item.status === "Ẩn") {
+            return;
+        }
 
         html += `
-            <option value="${item.id}">
-                ${item.name}
-            </option>
+            <li>
+                <button class="dropdown-item"
+                        onclick="filterByCategory(${item.id}, '${item.name}')">
+                    ${item.name}
+                </button>
+            </li>
         `;
     });
 
-    document.getElementById(
-        "category-filter"
-    ).innerHTML = html;
+    document.getElementById("category-dropdown").innerHTML = html;
 }
 
-async function filterByCategory() {
+function filterAllProducts() {
+    loadProducts();
+}
 
-    const categoryId =
-        document.getElementById(
-            "category-filter"
-        ).value;
-
-    if (categoryId === "") {
-
-        loadProducts();
-        return;
-    }
-
+async function filterByCategory(categoryId, categoryName) {
     const response = await fetch(
         `${API_BASE_URL}/bdh/products/category/${categoryId}`
     );

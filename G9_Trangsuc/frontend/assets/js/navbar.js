@@ -10,7 +10,7 @@ function renderNavbar() {
             </a>
 
             <button onclick="logout()" class="btn btn-danger btn-sm nav-icon-btn">
-                🚪 Đăng xuất
+                🚪
             </button>
         `;
     } else {
@@ -31,20 +31,18 @@ function renderNavbar() {
 
                 <div class="d-flex align-items-center gap-2 flex-wrap">
 
-                    <a href="products.html" class="btn btn-outline-light btn-sm nav-icon-btn">
-                        💎 Sản phẩm
-                    </a>
+                    
 
                     <a href="gold-price.html" class="btn btn-outline-warning btn-sm nav-icon-btn">
-                        🪙 Giá vàng
+                        🪙 
                     </a>
 
                     <a href="news.html" class="btn btn-outline-info btn-sm nav-icon-btn">
-                        📰 Tin tức
+                        📰 
                     </a>
 
                     <a href="cart.html" class="btn btn-warning btn-sm nav-icon-btn">
-                        🛒 Giỏ hàng
+                        🛒 
                     </a>
 
                     ${authHtml}
