@@ -12,99 +12,69 @@
 
 <body>
 
+<div id="sidebar"></div>
+
 <div class="admin-content">
 
-    <div class="mb-4">
-        <h2 class="fw-bold">Dashboard thống kê</h2>
-        <p class="text-muted">Tổng quan hoạt động website G9 Trang Sức</p>
-    </div>
+    <h2 class="fw-bold">Dashboard thống kê</h2>
+    <p class="text-muted mb-4">Tổng quan hoạt động website G9 Trang Sức</p>
 
     <div class="row g-4 mb-5">
 
-    <!-- Sản phẩm -->
-    <div class="col-md-3">
-        <a href="products.html" class="dashboard-link">
+        <div class="col-md-3">
+            <a href="products.html" class="text-decoration-none">
+                <div class="dashboard-card bg-blue">
+                    <p>Sản phẩm</p>
+                    <h2 id="product-count">0</h2>
+                </div>
+            </a>
+        </div>
 
-            <div class="dashboard-card bg-blue">
+        <div class="col-md-3">
+            <a href="orders.html" class="text-decoration-none">
+                <div class="dashboard-card bg-green">
+                    <p>Đơn hàng</p>
+                    <h2 id="order-count">0</h2>
+                </div>
+            </a>
+        </div>
 
-                <p>Sản phẩm</p>
+        <div class="col-md-3">
+            <a href="users.html" class="text-decoration-none">
+                <div class="dashboard-card bg-yellow">
+                    <p>Người dùng</p>
+                    <h2 id="user-count">0</h2>
+                </div>
+            </a>
+        </div>
 
-                <h2 id="product-count">0</h2>
+        <div class="col-md-3">
+            <a href="orders.html" class="text-decoration-none">
+                <div class="dashboard-card bg-red">
+                    <p>Doanh thu</p>
+                    <h2 id="revenue">0</h2>
+                </div>
+            </a>
+        </div>
 
-             
-            </div>
-
-        </a>
     </div>
-
-    <!-- Đơn hàng -->
-    <div class="col-md-3">
-        <a href="orders.html" class="dashboard-link">
-
-            <div class="dashboard-card bg-green">
-
-                <p>Đơn hàng</p>
-
-                <h2 id="order-count">0</h2>
-
-               
-            </div>
-
-        </a>
-    </div>
-
-    <!-- Người dùng -->
-    <div class="col-md-3">
-        <a href="users.html" class="dashboard-link">
-
-            <div class="dashboard-card bg-yellow">
-
-                <p>Người dùng</p>
-
-                <h2 id="user-count">0</h2>
-
-                
-
-            </div>
-
-        </a>
-    </div>
-
-    <!-- Doanh thu -->
-    <div class="col-md-3">
-        <a href="orders.html" class="dashboard-link">
-
-            <div class="dashboard-card bg-red">
-
-                <p>Doanh thu</p>
-
-                <h2 id="revenue">0 VNĐ</h2>
-
-                
-            </div>
-
-        </a>
-    </div>
-
-</div>
 
     <div class="card admin-card">
         <div class="card-body">
-            <h5 class="mb-4">Biểu đồ thống kê hệ thống</h5>
-            <canvas id="chart" height="120"></canvas>
+            <canvas id="chart"></canvas>
         </div>
     </div>
 
 </div>
 
-<script src="../assets/js/api.js"></script>
-<script src="../assets/js/admin-layout.js"></script>
+<script src="../assets/js/shared/api.js"></script>
+<script src="../assets/js/shared/admin-sidebar.js"></script>
 
 <script>
-    renderAdminLayout("dashboard");
+    renderAdminSidebar("dashboard");
 </script>
 
-<script src="../assets/js/dashboard.js"></script>
+<script src="../assets/js/admin/dashboard.js"></script>
 
 </body>
 </html>

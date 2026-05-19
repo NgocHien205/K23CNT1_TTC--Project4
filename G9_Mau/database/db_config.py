@@ -6,7 +6,7 @@ def get_connection():
     conn = pyodbc.connect(
         "DRIVER={ODBC Driver 17 for SQL Server};"
         "SERVER=localhost;"
-        "DATABASE=G9_TrangSucDB;"
+        "DATABASE=_TrangSucDB;"
         "Trusted_Connection=yes;"
     )
 
