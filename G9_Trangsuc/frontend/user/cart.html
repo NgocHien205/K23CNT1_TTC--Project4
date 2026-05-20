@@ -9,43 +9,56 @@
 
 <body>
 
-<nav class="navbar navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a href="index.html" class="navbar-brand text-warning fw-bold">G9 Trang Sức</a>
-        <a href="products.html" class="btn btn-outline-light btn-sm">Tiếp tục mua</a>
+        <a class="navbar-brand fw-bold" href="index.html">G9 Trang Sức</a>
+
+        <div>
+            <a href="products.html" class="btn btn-outline-light btn-sm">Sản phẩm</a>
+            <a href="checkout.html" class="btn btn-warning btn-sm">Thanh toán</a>
+        </div>
     </div>
 </nav>
 
-<div class="container py-5">
+<main class="container my-5">
 
-    <h2>Giỏ hàng của bạn</h2>
+    <h2 class="mb-4">Giỏ hàng của bạn</h2>
 
-    <table class="table table-bordered mt-4">
+    <table class="table table-bordered align-middle">
         <thead class="table-dark">
             <tr>
+                <th>Ảnh</th>
                 <th>Sản phẩm</th>
                 <th>Giá</th>
                 <th>Số lượng</th>
                 <th>Thành tiền</th>
-                <th>Xóa</th>
+                <th>Thao tác</th>
             </tr>
         </thead>
 
-        <tbody id="cart-body"></tbody>
+        <tbody id="cartBody">
+            <tr>
+                <td colspan="6">Đang tải giỏ hàng...</td>
+            </tr>
+        </tbody>
     </table>
 
-    <h4 id="cart-total" class="text-danger"></h4>
+    <h4 id="totalBox" class="text-end text-danger"></h4>
 
-    <a href="checkout.html" class="btn btn-success mt-3">
-        Thanh toán
-    </a>
+    <div class="text-end">
+        <a href="checkout.html" class="btn btn-warning">
+            Tiến hành thanh toán
+        </a>
+    </div>
 
-</div>
+</main>
 
-<script src="assets/js/api.js"></script>
-<script src="assets/js/cart.js"></script>
-<script src="assets/js/navbar.js"></script>
-<script src="assets/js/footer.js"></script>
+<footer class="bg-dark text-white text-center py-3">
+    G9 Trang Sức © 2026
+</footer>
+
+<script src="../assets/js/shared/config.js"></script>
+<script src="../assets/js/user/cart.js"></script>
 
 </body>
 </html>
