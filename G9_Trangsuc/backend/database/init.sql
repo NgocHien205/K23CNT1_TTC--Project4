@@ -1,0 +1,74 @@
+-- CREATE DATABASE IF NOT EXISTS G9_TrangSucDB;
+-- USE G9_TrangSucDB;
+
+-- CREATE TABLE users (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     full_name VARCHAR(100),
+--     username VARCHAR(50) UNIQUE,
+--     email VARCHAR(100),
+--     password VARCHAR(255),
+--     role VARCHAR(20) DEFAULT 'user',
+--     status VARCHAR(30) DEFAULT 'active',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- CREATE TABLE categories (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(100) NOT NULL,
+--     description TEXT,
+--     status VARCHAR(30) DEFAULT 'active'
+-- );
+
+-- CREATE TABLE products (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(150) NOT NULL,
+--     price DECIMAL(15,2) NOT NULL,
+--     quantity INT DEFAULT 0,
+--     image VARCHAR(255),
+--     description TEXT,
+--     category_id INT,
+--     status VARCHAR(30) DEFAULT 'active',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (category_id) REFERENCES categories(id)
+-- );
+
+-- CREATE TABLE orders (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT,
+--     customer_name VARCHAR(100),
+--     phone VARCHAR(20),
+--     address TEXT,
+--     total DECIMAL(15,2),
+--     status VARCHAR(50) DEFAULT 'Chờ xác nhận',
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (user_id) REFERENCES users(id)
+-- );
+
+-- CREATE TABLE order_details (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     order_id INT,
+--     product_id INT,
+--     quantity INT,
+--     price DECIMAL(15,2),
+--     FOREIGN KEY (order_id) REFERENCES orders(id),
+--     FOREIGN KEY (product_id) REFERENCES products(id)
+-- );
+
+-- CREATE TABLE news (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     title VARCHAR(200),
+--     content TEXT,
+--     image VARCHAR(255),
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
+
+-- CREATE TABLE reviews (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     product_id INT,
+--     user_id INT,
+--     rating INT,
+--     comment TEXT,
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (product_id) REFERENCES products(id),
+--     FOREIGN KEY (user_id) REFERENCES users(id)
+-- );

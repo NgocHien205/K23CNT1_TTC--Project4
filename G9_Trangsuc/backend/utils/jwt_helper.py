@@ -1,13 +1,12 @@
-# ==============================
-# IMPORT THƯ VIỆN
-# ==============================
 import jwt
 import datetime
-from config import Config
+import os
+from dotenv import load_dotenv
 
-# ==============================
-# TẠO TOKEN ĐĂNG NHẬP
-# ==============================
+load_dotenv()
+
+JWT_SECRET = os.getenv("JWT_SECRET", "G9_JWT_SECRET")
+
 def generate_token(user):
     payload = {
         "id": user["id"],
@@ -16,14 +15,11 @@ def generate_token(user):
         "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24)
     }
 
-    token = jwt.encode(payload, Config.JWT_SECRET, algorithm="HS256")
-    return token
+    return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
-# ==============================
-# GIẢI MÃ TOKEN
-# ==============================
+
 def decode_token(token):
     try:
-        return jwt.decode(token, Config.JWT_SECRET, algorithms=["HS256"])
+        return jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     except:
         return None
