@@ -1,12 +1,19 @@
+from flask import Blueprint, jsonify
+from backend.db_config import get_connection
+from flask import request
 from flask import Blueprint, jsonify, request
-from database.db import get_connection
-
-gold_bp = Blueprint("gold_bp", __name__)
 
 
-# Lấy toàn bộ giá vàng
+# TẠO BLUEPRINT
+gold_bp = Blueprint(
+    "gold_bp",
+    __name__
+)
+
+# LẤY DANH SÁCH GIÁ VÀNG
 @gold_bp.route("/", methods=["GET"])
 def get_gold_prices():
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -21,24 +28,31 @@ def get_gold_prices():
         ORDER BY G9_NgayCapNhat DESC
     """)
 
-    prices = []
+    gold_prices = []
 
-    for row in cursor.fetchall():
-        prices.append({
+    rows = cursor.fetchall()
+
+    for row in rows:
+
+        gold_prices.append({
+
             "id": row.G9_MaGiaVang,
             "type": row.G9_LoaiVang,
             "buyPrice": float(row.G9_GiaMua),
             "sellPrice": float(row.G9_GiaBan),
             "updatedAt": str(row.G9_NgayCapNhat)
+
         })
 
     conn.close()
-    return jsonify(prices)
+
+    return jsonify(gold_prices)
 
 
-# Lấy giá vàng mới nhất theo từng loại
+# GIÁ VÀNG MỚI NHẤT
 @gold_bp.route("/latest", methods=["GET"])
 def get_latest_gold_prices():
+
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -46,7 +60,7 @@ def get_latest_gold_prices():
         SELECT *
         FROM (
             SELECT *,
-                   ROW_NUMBER() OVER (
+                   ROW_NUMBER() OVER(
                        PARTITION BY G9_LoaiVang
                        ORDER BY G9_NgayCapNhat DESC
                    ) AS rn
@@ -57,20 +71,23 @@ def get_latest_gold_prices():
 
     prices = []
 
-    for row in cursor.fetchall():
+    rows = cursor.fetchall()
+
+    for row in rows:
+
         prices.append({
-            "id": row.G9_MaGiaVang,
+
             "type": row.G9_LoaiVang,
             "buyPrice": float(row.G9_GiaMua),
             "sellPrice": float(row.G9_GiaBan),
             "updatedAt": str(row.G9_NgayCapNhat)
+
         })
 
     conn.close()
+
     return jsonify(prices)
-
-
-# Thêm giá vàng
+# THÊM GIÁ VÀNG MỚI
 @gold_bp.route("/create", methods=["POST"])
 def create_gold_price():
     data = request.json
@@ -87,9 +104,9 @@ def create_gold_price():
         )
         VALUES (?, ?, ?)
     """, (
-        data.get("type"),
-        data.get("buyPrice"),
-        data.get("sellPrice")
+        data["type"],
+        data["buyPrice"],
+        data["sellPrice"]
     ))
 
     conn.commit()
@@ -101,7 +118,6 @@ def create_gold_price():
     })
 
 
-# Cập nhật giá vàng
 @gold_bp.route("/update/<int:id>", methods=["PUT"])
 def update_gold_price(id):
     data = request.json
@@ -118,9 +134,9 @@ def update_gold_price(id):
             G9_NgayCapNhat = GETDATE()
         WHERE G9_MaGiaVang = ?
     """, (
-        data.get("type"),
-        data.get("buyPrice"),
-        data.get("sellPrice"),
+        data["type"],
+        data["buyPrice"],
+        data["sellPrice"],
         id
     ))
 
@@ -133,7 +149,6 @@ def update_gold_price(id):
     })
 
 
-# Xóa giá vàng
 @gold_bp.route("/delete/<int:id>", methods=["DELETE"])
 def delete_gold_price(id):
     conn = get_connection()

@@ -1,29 +1,35 @@
-from flask import Blueprint, request, jsonify
-from database.db import get_connection
+from flask import Blueprint, jsonify
+from backend.db_config import get_connection
+from flask import Blueprint, jsonify, request
 
-category_bp = Blueprint("category_bp", __name__)
+# TẠO BLUEPRINT DANH MỤC
+category_bp = Blueprint(
+    "category_bp",
+    __name__
+)
 
-
-# Lấy danh mục
+# API LẤY DANH SÁCH DANH MỤC
 @category_bp.route("/", methods=["GET"])
 def get_categories():
+
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT
+        SELECT 
             G9_MaDanhMuc,
             G9_TenDanhMuc,
             G9_MoTa,
             G9_MaDanhMucCha,
             G9_TrangThai
         FROM G9_DanhMuc
-        ORDER BY G9_MaDanhMuc ASC
     """)
 
     categories = []
 
-    for row in cursor.fetchall():
+    rows = cursor.fetchall()
+
+    for row in rows:
         categories.append({
             "id": row.G9_MaDanhMuc,
             "name": row.G9_TenDanhMuc,
@@ -33,10 +39,9 @@ def get_categories():
         })
 
     conn.close()
+
     return jsonify(categories)
 
-
-# Thêm danh mục
 @category_bp.route("/create", methods=["POST"])
 def create_category():
     data = request.json
@@ -49,15 +54,13 @@ def create_category():
         (
             G9_TenDanhMuc,
             G9_MoTa,
-            G9_MaDanhMucCha,
-            G9_TrangThai
+            G9_MaDanhMucCha
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?)
     """, (
-        data.get("name"),
-        data.get("description"),
-        data.get("parentId"),
-        data.get("status", "Hoạt động")
+        data["name"],
+        data["description"],
+        data.get("parentId")
     ))
 
     conn.commit()
@@ -69,7 +72,6 @@ def create_category():
     })
 
 
-# Cập nhật danh mục
 @category_bp.route("/update/<int:id>", methods=["PUT"])
 def update_category(id):
     data = request.json
@@ -79,17 +81,17 @@ def update_category(id):
 
     cursor.execute("""
         UPDATE G9_DanhMuc
-        SET
+        SET 
             G9_TenDanhMuc = ?,
             G9_MoTa = ?,
             G9_MaDanhMucCha = ?,
             G9_TrangThai = ?
         WHERE G9_MaDanhMuc = ?
     """, (
-        data.get("name"),
-        data.get("description"),
+        data["name"],
+        data["description"],
         data.get("parentId"),
-        data.get("status"),
+        data["status"],
         id
     ))
 
@@ -102,33 +104,6 @@ def update_category(id):
     })
 
 
-# Ẩn / hiện danh mục
-@category_bp.route("/update-status/<int:id>", methods=["PUT"])
-def update_category_status(id):
-    data = request.json
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        UPDATE G9_DanhMuc
-        SET G9_TrangThai = ?
-        WHERE G9_MaDanhMuc = ?
-    """, (
-        data.get("status"),
-        id
-    ))
-
-    conn.commit()
-    conn.close()
-
-    return jsonify({
-        "success": True,
-        "message": "Cập nhật trạng thái danh mục thành công"
-    })
-
-
-# Xóa danh mục
 @category_bp.route("/delete/<int:id>", methods=["DELETE"])
 def delete_category(id):
     conn = get_connection()
@@ -145,4 +120,26 @@ def delete_category(id):
     return jsonify({
         "success": True,
         "message": "Xóa danh mục thành công"
+    })
+#API cập nhật trạng thái
+@category_bp.route("/update-status/<int:id>", methods=["PUT"])
+def update_category_status(id):
+    data = request.json
+    status = data.get("status")
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE G9_DanhMuc
+        SET G9_TrangThai = ?
+        WHERE G9_MaDanhMuc = ?
+    """, (status, id))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "success": True,
+        "message": "Cập nhật trạng thái danh mục thành công"
     })

@@ -1,10 +1,22 @@
+# Import các thư viện cần dùng
 from flask import Blueprint, jsonify, request
-from database.db import get_connection
+from backend.db_config import get_connection
 
+
+# =========================================================
+# TẠO BLUEPRINT CHO MODULE TIN TỨC
+# Blueprint giúp tách riêng API tin tức ra khỏi app.py
+# =========================================================
 news_bp = Blueprint("news_bp", __name__)
 
 
-# Lấy danh sách tin tức
+# =========================================================
+# 1. API LẤY DANH SÁCH TIN TỨC
+# URL: GET /api/bdh/news/
+# Dùng cho:
+# - Trang admin quản lý tin tức
+# - Trang khách hàng xem danh sách tin tức
+# =========================================================
 @news_bp.route("/", methods=["GET"])
 def get_news():
     conn = get_connection()
@@ -22,10 +34,13 @@ def get_news():
             dm.G9_TenDanhMuc,
             nd.G9_HoTen
         FROM G9_TinTuc tt
+
         LEFT JOIN G9_DanhMucTinTuc dm
             ON tt.G9_MaDanhMuc = dm.G9_MaDanhMuc
+
         LEFT JOIN G9_NguoiDung nd
             ON tt.G9_MaNguoiDang = nd.G9_MaNguoiDung
+
         ORDER BY tt.G9_NgayDang DESC
     """)
 
@@ -45,10 +60,15 @@ def get_news():
         })
 
     conn.close()
+
     return jsonify(news_list)
 
 
-# Chi tiết tin tức
+# =========================================================
+# 2. API LẤY CHI TIẾT TIN TỨC
+# URL: GET /api/bdh/news/<id>
+# Dùng cho trang news-detail.html
+# =========================================================
 @news_bp.route("/<int:id>", methods=["GET"])
 def get_news_detail(id):
     conn = get_connection()
@@ -56,38 +76,54 @@ def get_news_detail(id):
 
     cursor.execute("""
         SELECT
-            G9_MaTinTuc,
-            G9_TieuDe,
-            G9_MoTaNgan,
-            G9_NoiDung,
-            G9_HinhAnh,
-            G9_NgayDang,
-            G9_TrangThai
-        FROM G9_TinTuc
-        WHERE G9_MaTinTuc = ?
+            tt.G9_MaTinTuc,
+            tt.G9_TieuDe,
+            tt.G9_MoTaNgan,
+            tt.G9_NoiDung,
+            tt.G9_HinhAnh,
+            tt.G9_NgayDang,
+            tt.G9_TrangThai,
+            dm.G9_TenDanhMuc,
+            nd.G9_HoTen
+        FROM G9_TinTuc tt
+
+        LEFT JOIN G9_DanhMucTinTuc dm
+            ON tt.G9_MaDanhMuc = dm.G9_MaDanhMuc
+
+        LEFT JOIN G9_NguoiDung nd
+            ON tt.G9_MaNguoiDang = nd.G9_MaNguoiDung
+
+        WHERE tt.G9_MaTinTuc = ?
     """, (id,))
 
     row = cursor.fetchone()
+
     conn.close()
 
-    if not row:
+    if row:
         return jsonify({
-            "success": False,
-            "message": "Không tìm thấy tin tức"
-        }), 404
+            "id": row.G9_MaTinTuc,
+            "title": row.G9_TieuDe,
+            "shortDescription": row.G9_MoTaNgan,
+            "content": row.G9_NoiDung,
+            "image": row.G9_HinhAnh,
+            "createdAt": str(row.G9_NgayDang),
+            "status": row.G9_TrangThai,
+            "category": row.G9_TenDanhMuc,
+            "author": row.G9_HoTen
+        })
 
     return jsonify({
-        "id": row.G9_MaTinTuc,
-        "title": row.G9_TieuDe,
-        "shortDescription": row.G9_MoTaNgan,
-        "content": row.G9_NoiDung,
-        "image": row.G9_HinhAnh,
-        "createdAt": str(row.G9_NgayDang),
-        "status": row.G9_TrangThai
-    })
+        "success": False,
+        "message": "Không tìm thấy tin tức"
+    }), 404
 
 
-# Lấy danh mục tin tức
+# =========================================================
+# 3. API LẤY DANH SÁCH DANH MỤC TIN TỨC
+# URL: GET /api/bdh/news/categories
+# Dùng để đổ dữ liệu vào select danh mục khi thêm/sửa tin tức
+# =========================================================
 @news_bp.route("/categories", methods=["GET"])
 def get_news_categories():
     conn = get_connection()
@@ -98,6 +134,7 @@ def get_news_categories():
             G9_MaDanhMuc,
             G9_TenDanhMuc
         FROM G9_DanhMucTinTuc
+        ORDER BY G9_MaDanhMuc ASC
     """)
 
     categories = []
@@ -109,10 +146,16 @@ def get_news_categories():
         })
 
     conn.close()
+
     return jsonify(categories)
 
 
-# Thêm tin tức
+# =========================================================
+# 4. API THÊM TIN TỨC
+# URL: POST /api/bdh/news/create
+# Dữ liệu nhận từ frontend:
+# title, shortDescription, content, image, userId, categoryId, status
+# =========================================================
 @news_bp.route("/create", methods=["POST"])
 def create_news():
     data = request.json
@@ -151,7 +194,11 @@ def create_news():
     })
 
 
-# Cập nhật tin tức
+# =========================================================
+# 5. API CẬP NHẬT TIN TỨC
+# URL: PUT /api/bdh/news/update/<id>
+# Dùng khi admin bấm Sửa và Lưu tin tức
+# =========================================================
 @news_bp.route("/update/<int:id>", methods=["PUT"])
 def update_news(id):
     data = request.json
@@ -175,7 +222,7 @@ def update_news(id):
         data.get("content"),
         data.get("image"),
         data.get("categoryId"),
-        data.get("status"),
+        data.get("status", "Hiển thị"),
         id
     ))
 
@@ -188,10 +235,15 @@ def update_news(id):
     })
 
 
-# Ẩn / hiện tin tức
+# =========================================================
+# 6. API CẬP NHẬT TRẠNG THÁI TIN TỨC
+# URL: PUT /api/bdh/news/update-status/<id>
+# Dùng để Ẩn / Hiển thị tin tức
+# =========================================================
 @news_bp.route("/update-status/<int:id>", methods=["PUT"])
 def update_news_status(id):
     data = request.json
+    status = data.get("status")
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -201,7 +253,7 @@ def update_news_status(id):
         SET G9_TrangThai = ?
         WHERE G9_MaTinTuc = ?
     """, (
-        data.get("status"),
+        status,
         id
     ))
 
@@ -214,7 +266,11 @@ def update_news_status(id):
     })
 
 
-# Xóa tin tức
+# =========================================================
+# 7. API XÓA TIN TỨC
+# URL: DELETE /api/bdh/news/delete/<id>
+# Dùng khi admin muốn xóa tin tức khỏi database
+# =========================================================
 @news_bp.route("/delete/<int:id>", methods=["DELETE"])
 def delete_news(id):
     conn = get_connection()
