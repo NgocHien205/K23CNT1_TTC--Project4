@@ -1,26 +1,19 @@
 // ==============================
-// FILE CẤU HÌNH DÙNG CHUNG
+// FILE: config.js
+// Cấu hình API dùng chung
 // ==============================
 
 const API_BASE_URL = "http://127.0.0.1:5000/api";
 
-// ==============================
-// LẤY USER ĐANG ĐĂNG NHẬP
-// ==============================
 function getCurrentUser() {
-    return JSON.parse(localStorage.getItem("user"));
+    const user = localStorage.getItem("user");
+    return user ? JSON.parse(user) : null;
 }
 
-// ==============================
-// LẤY TOKEN
-// ==============================
 function getToken() {
     return localStorage.getItem("token");
 }
 
-// ==============================
-// KIỂM TRA ĐĂNG NHẬP
-// ==============================
 function checkLogin() {
     const user = getCurrentUser();
 
@@ -30,9 +23,6 @@ function checkLogin() {
     }
 }
 
-// ==============================
-// KIỂM TRA QUYỀN ADMIN
-// ==============================
 function checkAdmin() {
     const user = getCurrentUser();
 
@@ -42,9 +32,6 @@ function checkAdmin() {
     }
 }
 
-// ==============================
-// ĐĂNG XUẤT
-// ==============================
 function logout() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");

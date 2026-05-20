@@ -4,6 +4,7 @@
 // - Lấy dữ liệu thống kê từ API
 // - Hiển thị lên trang admin dashboard
 // ==============================
+checkAdmin();
 
 async function loadDashboard() {
     try {

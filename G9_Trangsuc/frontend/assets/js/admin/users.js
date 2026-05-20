@@ -5,6 +5,8 @@
 // - Cập nhật trạng thái tài khoản
 // ==============================
 
+checkAdmin();
+
 async function loadUsers() {
     const tbody = document.getElementById("userTable");
 

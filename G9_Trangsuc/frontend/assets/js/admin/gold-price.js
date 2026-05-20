@@ -1,3 +1,6 @@
+
+checkAdmin();
+
 async function loadGoldPrices() {
     const response = await fetch(`${API_BASE_URL}/bdh/gold/latest`);
     const prices = await response.json();

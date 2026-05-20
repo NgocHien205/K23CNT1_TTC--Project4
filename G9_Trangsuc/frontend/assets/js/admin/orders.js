@@ -5,6 +5,8 @@
 // - Cập nhật trạng thái đơn hàng
 // ==============================
 
+checkAdmin();
+
 async function loadOrders() {
     const tbody = document.getElementById("orderTable");
 
