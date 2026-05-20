@@ -1,41 +1,53 @@
-async function login() {
+// ==============================
+// FILE: login.js
+// CHỨC NĂNG:
+// - Đăng nhập user/admin
+// - Lưu token vào localStorage
+// - Phân quyền chuyển trang
+// ==============================
+
+const loginForm = document.getElementById("loginForm");
+
+loginForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    // Lấy dữ liệu từ form
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
 
-    const response = await fetch(`${API_BASE_URL}/nnh/auth/login`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            username,
-            password
-        })
-    });
-
-    const data = await response.json();
-
-    if (data.success) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-
-        Swal.fire({
-            icon: "success",
-            title: "Đăng nhập thành công",
-            text: "Xin chào " + data.user.name
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
         });
 
-        setTimeout(() => {
-            if (Number(data.user.roleId) === 1 || Number(data.user.roleId) === 2) {
-                window.location.href = "admin/dashboard.html";
+        const result = await response.json();
+
+        if (result.success) {
+            // Lưu token và user
+            localStorage.setItem("token", result.token);
+            localStorage.setItem("user", JSON.stringify(result.user));
+
+            alert("Đăng nhập thành công");
+
+            // Phân quyền chuyển trang
+            if (result.user.role.toLowerCase() === "admin") {
+                window.location.href = "../admin/dashboard.html";
             } else {
                 window.location.href = "index.html";
             }
-        }, 1000);
+        } else {
+            alert(result.message);
+        }
 
-    } else {
-        Swal.fire({
-            icon: "error",
-            title: data.message
-        });
+    } catch (error) {
+        alert("Không thể kết nối đến server");
+        console.error(error);
     }
-}
+});

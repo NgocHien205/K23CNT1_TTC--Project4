@@ -59,6 +59,14 @@ async function loadProducts() {
 // THÊM SẢN PHẨM VÀO GIỎ
 // ==============================
 async function addToCart(productId) {
+    const user = getCurrentUser();
+
+    if (!user) {
+        alert("Bạn cần đăng nhập để thêm vào giỏ hàng");
+        window.location.href = "login.html";
+        return;
+    }
+
     try {
         const response = await fetch(`${API_BASE_URL}/cart/add`, {
             method: "POST",
@@ -66,7 +74,7 @@ async function addToCart(productId) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                user_id: CURRENT_USER_ID,
+                user_id: user.id,
                 product_id: productId,
                 quantity: 1
             })
