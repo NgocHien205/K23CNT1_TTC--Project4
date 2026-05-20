@@ -1,37 +1,68 @@
+# ==============================
+# IMPORT THƯ VIỆN
+# ==============================
 from flask import Flask
 from flask_cors import CORS
+import logging
+import os
 
-from backend.nnh_auth_api.auth_routes import auth_bp
-from backend.routes.product_routes import product_bp
-from backend.routes.category_routes import category_bp
-from backend.routes.order_routes import order_bp
-from backend.routes.gold_routes import gold_bp
-from backend.routes.news_routes import news_bp
-from backend.routes.dashboard_routes import dashboard_bp
-from backend.routes.user_routes import user_bp
-from backend.routes.review_routes import review_bp
-from backend.routes.upload_routes import upload_bp
+# ==============================
+# IMPORT ROUTES
+# ==============================
+from routes.auth_routes import auth_bp
+from routes.product_routes import product_bp
+from routes.category_routes import category_bp
+from routes.cart_routes import cart_bp
+from routes.order_routes import order_bp
+from routes.news_routes import news_bp
+from routes.gold_routes import gold_bp
+from routes.review_routes import review_bp
+from routes.admin_routes import admin_bp
+from routes.dashboard_routes import dashboard_bp
 
+# ==============================
+# KHỞI TẠO APP FLASK
+# ==============================
 app = Flask(__name__)
 CORS(app)
 
-app.register_blueprint(auth_bp, url_prefix="/api/nnh/auth")
-app.register_blueprint(product_bp, url_prefix="/api/bdh/products")
-app.register_blueprint(category_bp, url_prefix="/api/bdh/categories")
-app.register_blueprint(order_bp, url_prefix="/api/bdh/orders")
-app.register_blueprint(gold_bp, url_prefix="/api/bdh/gold")
-app.register_blueprint(news_bp, url_prefix="/api/bdh/news")
-app.register_blueprint(dashboard_bp, url_prefix="/api/bdh/dashboard")
-app.register_blueprint(user_bp, url_prefix="/api/bdh/users")
-app.register_blueprint(review_bp, url_prefix="/api/bdh/reviews")
-app.register_blueprint(upload_bp,url_prefix="/api/bdh/upload")
-    
+# ==============================
+# CẤU HÌNH LOG
+# ==============================
+os.makedirs("logs", exist_ok=True)
 
+logging.basicConfig(
+    filename="logs/app.log",
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s: %(message)s"
+)
+
+# ==============================
+# ĐĂNG KÝ BLUEPRINT ROUTES
+# ==============================
+app.register_blueprint(auth_bp, url_prefix="/api/auth")
+app.register_blueprint(product_bp, url_prefix="/api/products")
+app.register_blueprint(category_bp, url_prefix="/api/categories")
+app.register_blueprint(cart_bp, url_prefix="/api/cart")
+app.register_blueprint(order_bp, url_prefix="/api/orders")
+app.register_blueprint(news_bp, url_prefix="/api/news")
+app.register_blueprint(gold_bp, url_prefix="/api/gold")
+app.register_blueprint(review_bp, url_prefix="/api/reviews")
+app.register_blueprint(admin_bp, url_prefix="/api/admin")
+app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
+
+# ==============================
+# ROUTE KIỂM TRA SERVER
+# ==============================
 @app.route("/")
 def home():
     return {
-        "message": "G9 Trang Sức API đang chạy"
+        "success": True,
+        "message": "G9 Trang Sức API đang hoạt động"
     }
 
+# ==============================
+# CHẠY SERVER
+# ==============================
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True)

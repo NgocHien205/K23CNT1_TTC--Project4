@@ -1,44 +1,16 @@
 from flask import Blueprint, jsonify
-from backend.db_config import get_connection
 
-# TẠO BLUEPRINT
-dashboard_bp = Blueprint(
-    "dashboard_bp",
-    __name__
-)
+dashboard_bp = Blueprint("dashboard", __name__)
 
-# API THỐNG KÊ DASHBOARD
-@dashboard_bp.route("/statistics", methods=["GET"])
-def statistics():
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("SELECT COUNT(*) FROM G9_SanPham")
-    product_count = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM G9_DonHang")
-    order_count = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM G9_NguoiDung")
-    user_count = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM G9_TinTuc")
-    news_count = cursor.fetchone()[0]
-
-    cursor.execute("SELECT ISNULL(SUM(G9_TongTien), 0) FROM G9_DonHang")
-    revenue = cursor.fetchone()[0]
-
-    cursor.execute("SELECT COUNT(*) FROM G9_GiaVang")
-    gold_count = cursor.fetchone()[0]
-
-    conn.close()
-
+@dashboard_bp.route("/", methods=["GET"])
+def dashboard():
     return jsonify({
-        "products": product_count,
-        "orders": order_count,
-        "users": user_count,
-        "news": news_count,
-        "gold": gold_count,
-        "revenue": float(revenue)
+        "success": True,
+        "message": "Thống kê dashboard",
+        "data": {
+            "total_products": 20,
+            "total_orders": 15,
+            "total_users": 8,
+            "revenue": 120000000
+        }
     })

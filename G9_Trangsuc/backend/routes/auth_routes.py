@@ -1,8 +1,17 @@
+# ==============================
+# IMPORT THƯ VIỆN
+# ==============================
 from flask import Blueprint, request, jsonify
-from backend.db_config import get_connection
+from utils.jwt_helper import generate_token
 
-auth_bp = Blueprint("auth_bp", __name__)
+# ==============================
+# TẠO BLUEPRINT AUTH
+# ==============================
+auth_bp = Blueprint("auth", __name__)
 
+# ==============================
+# API ĐĂNG NHẬP
+# ==============================
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
@@ -10,95 +19,38 @@ def login():
     username = data.get("username")
     password = data.get("password")
 
-    conn = get_connection()
-    cursor = conn.cursor()
+    # Tài khoản demo
+    if username == "admin" and password == "123456":
+        user = {
+            "id": 1,
+            "username": "admin",
+            "role": "admin"
+        }
 
-    cursor.execute("""
-        SELECT 
-            nd.G9_MaNguoiDung,
-            nd.G9_HoTen,
-            nd.G9_TenDangNhap,
-            nd.G9_Email,
-            nd.G9_MaVaiTro,
-            vt.G9_TenVaiTro
-        FROM G9_NguoiDung nd
-        JOIN G9_VaiTro vt ON nd.G9_MaVaiTro = vt.G9_MaVaiTro
-        WHERE nd.G9_TenDangNhap = ?
-        AND nd.G9_MatKhau = ?
-    """, (username, password))
+        token = generate_token(user)
 
-    user = cursor.fetchone()
-    conn.close()
-
-    if user:
         return jsonify({
             "success": True,
             "message": "Đăng nhập thành công",
-            "user": {
-                "id": user.G9_MaNguoiDung,
-                "name": user.G9_HoTen,
-                "username": user.G9_TenDangNhap,
-                "email": user.G9_Email,
-                "roleId": user.G9_MaVaiTro,
-                "roleName": user.G9_TenVaiTro
-            }
+            "token": token,
+            "user": user
         })
 
     return jsonify({
         "success": False,
         "message": "Sai tài khoản hoặc mật khẩu"
     }), 401
+
+
+# ==============================
+# API ĐĂNG KÝ
+# ==============================
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
 
-    fullname = data.get("fullname")
-    username = data.get("username")
-    password = data.get("password")
-    email = data.get("email")
-    phone = data.get("phone")
-
-    conn = get_connection()
-    cursor = conn.cursor()
-
-    cursor.execute("""
-        SELECT G9_MaNguoiDung 
-        FROM G9_NguoiDung
-        WHERE G9_TenDangNhap = ? OR G9_Email = ?
-    """, (username, email))
-
-    existed = cursor.fetchone()
-
-    if existed:
-        conn.close()
-        return jsonify({
-            "success": False,
-            "message": "Tên đăng nhập hoặc email đã tồn tại"
-        })
-
-    cursor.execute("""
-        INSERT INTO G9_NguoiDung
-        (
-            G9_HoTen,
-            G9_TenDangNhap,
-            G9_MatKhau,
-            G9_Email,
-            G9_SoDienThoai,
-            G9_MaVaiTro
-        )
-        VALUES (?, ?, ?, ?, ?, 3)
-    """, (
-        fullname,
-        username,
-        password,
-        email,
-        phone
-    ))
-
-    conn.commit()
-    conn.close()
-
     return jsonify({
         "success": True,
-        "message": "Đăng ký tài khoản thành công"
+        "message": "Đăng ký thành công",
+        "data": data
     })

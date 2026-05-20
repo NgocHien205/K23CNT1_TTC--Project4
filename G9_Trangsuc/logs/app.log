@@ -1,0 +1,24 @@
+2026-05-20 22:10:43,541 INFO: Server started
+2026-05-20 22:10:43,584 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-20 22:10:43,584 INFO: [33mPress CTRL+C to quit[0m
+2026-05-20 22:10:43,586 INFO:  * Restarting with stat
+2026-05-20 22:10:44,056 INFO: Server started
+2026-05-20 22:10:44,076 WARNING:  * Debugger is active!
+2026-05-20 22:10:44,082 INFO:  * Debugger PIN: 632-648-573
+2026-05-20 22:11:19,949 INFO: Server started
+2026-05-20 22:11:19,978 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-20 22:11:19,979 INFO: [33mPress CTRL+C to quit[0m
+2026-05-20 22:11:19,983 INFO:  * Restarting with stat
+2026-05-20 22:11:20,434 INFO: Server started
+2026-05-20 22:11:20,450 WARNING:  * Debugger is active!
+2026-05-20 22:11:20,453 INFO:  * Debugger PIN: 632-648-573
+2026-05-20 22:13:00,000 INFO: Server started
+2026-05-20 22:13:00,057 INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-05-20 22:13:00,057 INFO: [33mPress CTRL+C to quit[0m
+2026-05-20 22:13:00,060 INFO:  * Restarting with stat
+2026-05-20 22:13:00,413 INFO: Server started
+2026-05-20 22:13:00,427 WARNING:  * Debugger is active!
+2026-05-20 22:13:00,431 INFO:  * Debugger PIN: 632-648-573
