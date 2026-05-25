@@ -17,23 +17,19 @@ load_dotenv()
 # HÀM KẾT NỐI DATABASE
 # ==============================
 def get_connection():
-    server = os.getenv("DB_SERVER")
-    database = os.getenv("DB_NAME")
-    driver = os.getenv("DB_DRIVER")
-
-    conn_str = (
-        f"DRIVER={{{driver}}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"Trusted_Connection=yes;"
-        f"TrustServerCertificate=yes;"
+    conn = pyodbc.connect(
+        r"DRIVER={ODBC Driver 17 for SQL Server};"
+        r"SERVER=HIEN1222899695;"
+        r"DATABASE=G9_TrangSucDB;"
+        r"Trusted_Connection=yes;"
+        r"TrustServerCertificate=yes;"
     )
 
-    return pyodbc.connect(conn_str)
+    return conn
 
 
 # ==============================
-# CHUYỂN NHIỀU DÒNG THÀNH LIST DICT
+# CHUYỂN NHIỀU DÒNG -> LIST DICT
 # ==============================
 def rows_to_dict(cursor):
     columns = [col[0] for col in cursor.description]
@@ -41,7 +37,7 @@ def rows_to_dict(cursor):
 
 
 # ==============================
-# CHUYỂN 1 DÒNG THÀNH DICT
+# CHUYỂN 1 DÒNG -> DICT
 # ==============================
 def row_to_dict(cursor):
     columns = [col[0] for col in cursor.description]

@@ -1,53 +1,32 @@
-// ==============================
-// FILE: login.js
-// CHỨC NĂNG:
-// - Đăng nhập user/admin
-// - Lưu token vào localStorage
-// - Phân quyền chuyển trang
-// ==============================
 
-const loginForm = document.getElementById("loginForm");
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+    loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        const apiBase = window.API_BASE_URL || 'http://127.0.0.1:5000/api';
+        const loginUrl = `${apiBase}/auth/login`;
 
-loginForm.addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    // Lấy dữ liệu từ form
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // Lưu token và user
-            localStorage.setItem("token", result.token);
-            localStorage.setItem("user", JSON.stringify(result.user));
-
-            alert("Đăng nhập thành công");
-
-            // Phân quyền chuyển trang
-            if (result.user.role.toLowerCase() === "admin") {
-                window.location.href = "../admin/dashboard.html";
+        try {
+            console.debug('Login URL:', loginUrl, 'username:', username);
+            const result = await apiFetch(loginUrl, { method: 'POST', body: JSON.stringify({ username, password }) });
+            console.debug('Login result:', result);
+            if (result && result.success) {
+                saveToken(result.token);
+                saveUser(result.user);
+                showToast(`Xin chào ${getDisplayName(result.user)}!`, 'success');
+                dispatchCartChanged();
+                setTimeout(() => {
+                    const redirectPath = isAdminUser(result.user) ? '../admin/dashboard.html' : 'index.html';
+                    window.location.href = redirectPath;
+                }, 700);
             } else {
-                window.location.href = "index.html";
+                showToast(result?.message || 'Đăng nhập không thành công', 'error');
             }
-        } else {
-            alert(result.message);
+        } catch (error) {
+            console.error('Login request failed:', error);
+            showToast('Không thể kết nối đến server', 'error');
         }
-
-    } catch (error) {
-        alert("Không thể kết nối đến server");
-        console.error(error);
-    }
-});
+    });
+}
