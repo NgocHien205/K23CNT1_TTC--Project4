@@ -16,11 +16,14 @@ let categoryDescendantsMap = new Map();
 let categoryNameToIdMap = new Map();
 let debounceTimer = null;
 
+const PAGE_SIZE = 9;
+
 const state = {
     keyword: "",
     priceFilter: "all",
     ratingFilter: "all",
     sort: "default",
+    page: 1,
 };
 
 function apiFetchSafe(url, options = {}) {
@@ -197,14 +200,20 @@ function buildCategoryMaps(categoryList) {
     });
 }
 
+function normalizeCategoryName(name) {
+    const lower = String(name || "").trim().toLowerCase();
+    if (lower === "lắc tay" || lower === "lắc") return "vòng tay";
+    return lower;
+}
+
 function resolveSelectedCategoryId() {
     if (selectedCategoryId) return String(selectedCategoryId);
     if (!activeCategory || activeCategory === "all") return null;
-    const normalized = String(activeCategory).trim();
+    const normalized = normalizeCategoryName(activeCategory);
     if (/^[0-9]+$/.test(normalized)) {
         return normalized;
     }
-    return categoryNameToIdMap.get(normalized.toLowerCase()) || null;
+    return categoryNameToIdMap.get(normalized) || null;
 }
 
 function getCategoryIdsByKeyword(keyword) {
@@ -221,7 +230,16 @@ function getCategoryIdsByKeyword(keyword) {
     matchedCategoryIds.forEach((categoryId) => {
         const descendants = categoryDescendantsMap.get(categoryId);
         if (descendants && descendants.size) {
-            descendants.forEach((descId) => ids.add(descId));
+            descendants.forEach((descId) => {
+                const descCat = categories.find(c => String(c.id) === String(descId));
+                if (descCat) {
+                    const descName = String(descCat.name || "").toLowerCase();
+                    // Ngăn chặn sự sai lệch giữa vàng và bạc do sai cấu trúc database cha-con
+                    if (lowerKeyword.includes("vàng") && descName.includes("bạc")) return;
+                    if (lowerKeyword.includes("bạc") && descName.includes("vàng")) return;
+                }
+                ids.add(descId);
+            });
         } else {
             ids.add(categoryId);
         }
@@ -256,6 +274,7 @@ function updateQueryString() {
     if (state.priceFilter && state.priceFilter !== "all") params.set("price", state.priceFilter);
     if (state.ratingFilter && state.ratingFilter !== "all") params.set("rating", state.ratingFilter);
     if (state.sort && state.sort !== "default") params.set("sort", state.sort);
+    if (state.page > 1) params.set("page", String(state.page));
 
     const qs = params.toString();
     const url = `${window.location.pathname}${qs ? "?" + qs : ""}`;
@@ -270,7 +289,7 @@ function readQueryString() {
     selectedCategoryId = categoryIdParam ? String(categoryIdParam) : null;
 
     if (!selectedCategoryId && activeCategory && activeCategory !== "all") {
-        selectedCategoryId = categoryNameToIdMap.get(String(activeCategory).trim().toLowerCase()) || null;
+        selectedCategoryId = categoryNameToIdMap.get(normalizeCategoryName(activeCategory)) || null;
     }
 
     if (selectedCategoryId && !categoryParam) {
@@ -284,6 +303,8 @@ function readQueryString() {
     state.priceFilter = params.get("price") || "all";
     state.ratingFilter = params.get("rating") || "all";
     state.sort = params.get("sort") || "default";
+    const pageParam = parseInt(params.get("page") || "1", 10);
+    state.page = Number.isFinite(pageParam) && pageParam > 0 ? pageParam : 1;
 
     if (el.searchInput) el.searchInput.value = state.keyword;
     if (el.priceFilter) el.priceFilter.value = state.priceFilter;
@@ -321,6 +342,19 @@ function getRatingFilterThreshold(value) {
     }
 }
 
+function getProductStockState(product) {
+    const quantity = Number(product.quantity || 0);
+    const status = String(product.status || "").trim();
+
+    if (status === "Ngừng bán") {
+        return { outOfStock: true, label: "Ngừng bán" };
+    }
+    if (quantity <= 0 || status === "Hết hàng") {
+        return { outOfStock: true, label: "Hết hàng" };
+    }
+    return { outOfStock: false, label: "Còn hàng" };
+}
+
 function renderRatingStars(value) {
     const score = Number(value || 0);
     const full = Math.round(score);
@@ -333,7 +367,7 @@ function renderRatingStars(value) {
 }
 
 function applyFilters() {
-    const keyword = state.keyword.trim().toLowerCase();
+    const keyword = state.keyword.trim().toLowerCase().normalize("NFC");
     const { min, max } = getPriceFilterBounds(state.priceFilter);
     const resolvedCategoryId = resolveSelectedCategoryId();
     const keywordCategoryIds = getCategoryIdsByKeyword(keyword);
@@ -342,11 +376,58 @@ function applyFilters() {
         const p = normalizeProduct(product);
         const productCategoryId = String(p.category_id || "");
 
-        const matchesCategory =
-            activeCategory === "all" ||
-            (resolvedCategoryId !== null && categoryDescendantsMap.has(resolvedCategoryId) && categoryDescendantsMap.get(resolvedCategoryId).has(productCategoryId)) ||
-            String(p.category_id || "") === resolvedCategoryId ||
-            String(p.category_name || "").toLowerCase() === String(activeCategory).toLowerCase();
+        const activeCatLower = normalizeCategoryName(activeCategory).normalize("NFC");
+        const prodCatLower = normalizeCategoryName(p.category_name).normalize("NFC");
+        const prodNameLower = String(p.name || "").toLowerCase().normalize("NFC");
+        const prodMaterialLower = String(p.material || "").toLowerCase().normalize("NFC");
+
+        let matchesCategory = false;
+        if (activeCategory === "all") {
+            matchesCategory = true;
+        } else {
+            // 1. Khớp ID trực tiếp hoặc mối quan hệ cha-con
+            let dbMatch = (resolvedCategoryId !== null && categoryDescendantsMap.has(resolvedCategoryId) && categoryDescendantsMap.get(resolvedCategoryId).has(productCategoryId)) ||
+                           String(p.category_id || "") === resolvedCategoryId ||
+                           prodCatLower === activeCatLower;
+
+            if (dbMatch) {
+                // Tách biệt Vàng và Bạc khi lọc theo DB
+                if (activeCatLower === "vàng" && (prodCatLower.includes("bạc") || prodNameLower.includes("bạc"))) {
+                    dbMatch = false;
+                }
+                if (activeCatLower === "bạc" && (prodCatLower.includes("vàng") || prodNameLower.includes("vàng"))) {
+                    dbMatch = false;
+                }
+            }
+
+            // 2. So khớp ngữ nghĩa chất liệu (Vàng, Bạc, Kim Cương)
+            let materialSemanticMatch = false;
+            if (activeCatLower === "vàng") {
+                const hasVang = prodCatLower.includes("vàng") || prodNameLower.includes("vàng") || prodMaterialLower.includes("vàng");
+                const hasBac = prodCatLower.includes("bạc") || prodNameLower.includes("bạc") || prodMaterialLower.includes("bạc");
+                materialSemanticMatch = hasVang && !hasBac;
+            } else if (activeCatLower === "bạc") {
+                const hasBac = prodCatLower.includes("bạc") || prodNameLower.includes("bạc") || prodMaterialLower.includes("bạc");
+                const hasVang = prodCatLower.includes("vàng") || prodNameLower.includes("vàng") || prodMaterialLower.includes("vàng");
+                materialSemanticMatch = hasBac && !hasVang;
+            } else if (activeCatLower === "kim cương") {
+                materialSemanticMatch = prodCatLower.includes("kim cương") || prodNameLower.includes("kim cương") || prodMaterialLower.includes("kim cương");
+            }
+
+            // 3. So khớp ngữ nghĩa loại sản phẩm (Nhẫn, Dây chuyền, Bông tai, Vòng tay)
+            let typeSemanticMatch = false;
+            if (activeCatLower === "nhẫn") {
+                typeSemanticMatch = prodCatLower.includes("nhẫn") || prodNameLower.includes("nhẫn");
+            } else if (activeCatLower === "dây chuyền") {
+                typeSemanticMatch = prodCatLower.includes("dây chuyền") || prodNameLower.includes("dây chuyền");
+            } else if (activeCatLower === "vòng tay") {
+                typeSemanticMatch = prodCatLower.includes("vòng tay") || prodNameLower.includes("vòng tay") || prodCatLower.includes("lắc") || prodNameLower.includes("lắc");
+            } else if (activeCatLower === "bông tai") {
+                typeSemanticMatch = prodCatLower.includes("bông tai") || prodNameLower.includes("bông tai");
+            }
+
+            matchesCategory = dbMatch || materialSemanticMatch || typeSemanticMatch;
+        }
 
         const searchable = [
             p.name,
@@ -356,7 +437,8 @@ function applyFilters() {
         ]
             .filter(Boolean)
             .join(" ")
-            .toLowerCase();
+            .toLowerCase()
+            .normalize("NFC");
 
         const matchesKeyword = !keyword || searchable.includes(keyword) || (keywordCategoryIds && keywordCategoryIds.has(productCategoryId));
         const matchesMin = min === null || p.finalPrice >= min;
@@ -388,12 +470,122 @@ function applyFilters() {
     }
 }
 
-function renderProducts() {
+function getTotalPages(itemCount) {
+    return Math.max(1, Math.ceil(itemCount / PAGE_SIZE));
+}
+
+function clampCurrentPage() {
+    const totalPages = getTotalPages(filteredProducts.length);
+    if (state.page > totalPages) {
+        state.page = totalPages;
+    }
+    if (state.page < 1) {
+        state.page = 1;
+    }
+}
+
+function resetToFirstPage() {
+    state.page = 1;
+}
+
+function goToPage(page, { scroll = true } = {}) {
+    const totalPages = getTotalPages(filteredProducts.length);
+    const nextPage = Math.min(Math.max(1, page), totalPages);
+    if (nextPage === state.page) return;
+
+    state.page = nextPage;
+    updateQueryString();
+    renderProducts({ scroll });
+}
+
+function getPaginationWindow(current, total, maxVisible = 5) {
+    if (total <= maxVisible) {
+        return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    let start = Math.max(1, current - Math.floor(maxVisible / 2));
+    let end = start + maxVisible - 1;
+
+    if (end > total) {
+        end = total;
+        start = end - maxVisible + 1;
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
+function renderPagination(totalItems) {
+    if (!el.productPagination) return;
+
+    const totalPages = getTotalPages(totalItems);
+
+    if (totalItems <= PAGE_SIZE) {
+        el.productPagination.hidden = true;
+        el.productPagination.innerHTML = "";
+        return;
+    }
+
+    const startIndex = (state.page - 1) * PAGE_SIZE + 1;
+    const endIndex = Math.min(state.page * PAGE_SIZE, totalItems);
+    const pages = getPaginationWindow(state.page, totalPages);
+
+    const pageItems = pages.map((pageNum) => `
+        <li class="page-item${pageNum === state.page ? " active" : ""}">
+            <button type="button"
+                    class="page-link"
+                    ${pageNum === state.page ? 'aria-current="page"' : ""}
+                    data-page="${pageNum}">
+                ${pageNum}
+            </button>
+        </li>
+    `).join("");
+
+    el.productPagination.hidden = false;
+    el.productPagination.innerHTML = `
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3">
+            <p class="product-pagination-summary mb-0">
+                Hiển thị ${startIndex}–${endIndex} / ${totalItems} sản phẩm
+            </p>
+            <ul class="pagination mb-0">
+                <li class="page-item${state.page <= 1 ? " disabled" : ""}">
+                    <button type="button" class="page-link" data-page="${state.page - 1}" aria-label="Trang trước"
+                        ${state.page <= 1 ? "disabled" : ""}>
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                </li>
+                ${pageItems}
+                <li class="page-item${state.page >= totalPages ? " disabled" : ""}">
+                    <button type="button" class="page-link" data-page="${state.page + 1}" aria-label="Trang sau"
+                        ${state.page >= totalPages ? "disabled" : ""}>
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                </li>
+            </ul>
+        </div>
+    `;
+
+    el.productPagination.querySelectorAll("[data-page]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            if (btn.disabled) return;
+            const target = parseInt(btn.dataset.page, 10);
+            if (!Number.isFinite(target)) return;
+            goToPage(target);
+        });
+    });
+}
+
+function renderProducts(options = {}) {
+    const { scroll = false } = options;
     if (!el.productList) return;
 
     applyFilters();
+    clampCurrentPage();
 
     if (!filteredProducts.length) {
+        if (el.productPagination) {
+            el.productPagination.hidden = true;
+            el.productPagination.innerHTML = "";
+        }
         el.productList.innerHTML = `
             <div class="col-12">
                 <div class="surface-card text-center p-5 fade-up">
@@ -406,23 +598,32 @@ function renderProducts() {
         return;
     }
 
-    el.productList.innerHTML = filteredProducts.map((product, index) => {
+    const totalItems = filteredProducts.length;
+    const start = (state.page - 1) * PAGE_SIZE;
+    const pageProducts = filteredProducts.slice(start, start + PAGE_SIZE);
+
+    el.productList.innerHTML = pageProducts.map((product, index) => {
         const p = normalizeProduct(product);
+        const stock = getProductStockState(p);
 
         return `
             <div class="col-sm-6 col-xl-4 fade-up" style="animation-delay: ${Math.min(index * 0.05, 0.35)}s">
-                <div class="card product-card h-100">
+                <div class="card product-card h-100${stock.outOfStock ? " product-card--out-of-stock" : ""}">
                     <div class="position-relative overflow-hidden">
                         <img
                             src="${escapeHtml(getImageUrl(p.image))}"
-                            class="card-img-top"
+                            class="card-img-top${stock.outOfStock ? " product-img--out-of-stock" : ""}"
                             alt="${escapeHtml(p.name)}"
                             loading="lazy"
                         >
                         <span class="badge badge-soft position-absolute top-0 start-0 m-3">
                             ${escapeHtml(p.category_name || "Trang sức")}
                         </span>
-                        ${p.hasDiscount ? `
+                        ${stock.outOfStock ? `
+                            <span class="badge bg-secondary position-absolute top-0 end-0 m-3">
+                                ${escapeHtml(stock.label)}
+                            </span>
+                        ` : p.hasDiscount ? `
                             <span class="badge bg-danger position-absolute top-0 end-0 m-3">
                                 Giảm ${formatMoney(p.discountValue)}
                             </span>
@@ -448,6 +649,11 @@ function renderProducts() {
                                     Tiết kiệm ${formatMoney(p.discountValue)}
                                 </div>
                             ` : ""}
+                            ${stock.outOfStock ? `
+                                <div class="small text-danger fw-semibold mt-1">
+                                    ${escapeHtml(stock.label)}
+                                </div>
+                            ` : ""}
                         </div>
 
                         <div class="d-flex gap-2 mt-auto">
@@ -456,17 +662,33 @@ function renderProducts() {
                                 Xem chi tiết
                             </a>
 
-                            <button type="button"
-                                    class="btn btn-gold"
-                                    onclick="addToCart(${Number(p.id)})">
-                                + Giỏ
-                            </button>
+                            ${stock.outOfStock ? `
+                                <button type="button"
+                                        class="btn btn-secondary"
+                                        disabled
+                                        title="${escapeHtml(stock.label)}">
+                                    ${escapeHtml(stock.label)}
+                                </button>
+                            ` : `
+                                <button type="button"
+                                        class="btn btn-gold"
+                                        onclick="addToCart(${Number(p.id)})">
+                                    + Giỏ
+                                </button>
+                            `}
                         </div>
                     </div>
                 </div>
             </div>
         `;
     }).join("");
+
+    renderPagination(totalItems);
+
+    if (scroll) {
+        const target = el.productList.closest("section") || el.productList;
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
 }
 
 async function loadPromotionMapFromProducts(productList) {
@@ -512,8 +734,9 @@ function bindCategoryButtons() {
                 ? categoryNameToIdMap.get(String(activeCategory).trim().toLowerCase()) || null
                 : null;
             updateActiveCategoryUI();
+            resetToFirstPage();
             updateQueryString();
-            renderProducts();
+            renderProducts({ scroll: true });
         });
     });
 }
@@ -524,8 +747,9 @@ function bindFilters() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 state.keyword = el.searchInput.value.trim();
+                resetToFirstPage();
                 updateQueryString();
-                renderProducts();
+                renderProducts({ scroll: true });
             }, 180);
         });
     }
@@ -533,24 +757,27 @@ function bindFilters() {
     if (el.priceFilter) {
         el.priceFilter.addEventListener("change", () => {
             state.priceFilter = el.priceFilter.value;
+            resetToFirstPage();
             updateQueryString();
-            renderProducts();
+            renderProducts({ scroll: true });
         });
     }
 
     if (el.ratingFilter) {
         el.ratingFilter.addEventListener("change", () => {
             state.ratingFilter = el.ratingFilter.value;
+            resetToFirstPage();
             updateQueryString();
-            renderProducts();
+            renderProducts({ scroll: true });
         });
     }
 
     if (el.sortFilter) {
         el.sortFilter.addEventListener("change", () => {
             state.sort = el.sortFilter.value;
+            resetToFirstPage();
             updateQueryString();
-            renderProducts();
+            renderProducts({ scroll: true });
         });
     }
 }
@@ -609,8 +836,28 @@ async function loadProducts() {
     }
 }
 
+function registerProductsForCart(list) {
+    if (!Array.isArray(list) || !list.length) return;
+    const byId = new Map(products.map((item) => [Number(item.id), item]));
+    list.forEach((item) => {
+        if (item && item.id != null) {
+            byId.set(Number(item.id), item);
+        }
+    });
+    products = Array.from(byId.values());
+}
+
 async function addToCart(productId) {
     const user = getCurrentUser();
+    const product = products.find((item) => Number(item.id) === Number(productId));
+
+    if (product) {
+        const stock = getProductStockState(product);
+        if (stock.outOfStock) {
+            showToast(`Sản phẩm đã ${stock.label.toLowerCase()}.`, "error");
+            return;
+        }
+    }
 
     if (!user?.id) {
         showToast("Bạn cần đăng nhập để thêm sản phẩm vào giỏ hàng.", "info");
@@ -657,6 +904,7 @@ async function init() {
     // Khởi tạo el sau khi DOM sẵn sàng
     el = {
         productList: document.getElementById("productList"),
+        productPagination: document.getElementById("productPagination"),
         searchInput: document.getElementById("searchInput"),
         priceFilter: document.getElementById("priceFilter"),
         ratingFilter: document.getElementById("ratingFilter"),
@@ -675,4 +923,6 @@ async function init() {
 
 document.addEventListener("DOMContentLoaded", init);
 window.addToCart = addToCart;
+window.registerProductsForCart = registerProductsForCart;
+window.getProductStockState = getProductStockState;
 })();
